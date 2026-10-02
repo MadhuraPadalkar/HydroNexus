@@ -1,0 +1,32 @@
+# HydroNexus Monorepo Code Ownership
+# Syntax: <pattern> <owners>
+
+# Default fallback owners for the entire repository
+* @hydronexus/core-maintainers
+
+# Frontend Portals
+/apps/officer-portal/       @hydronexus/frontend-leads @hydronexus/officer-team
+/apps/citizen-portal/       @hydronexus/frontend-leads @hydronexus/citizen-team
+
+# Shared Packages
+/packages/ui/               @hydronexus/design-systems-team
+/packages/types/            @hydronexus/architecture-leads
+/packages/api-client/       @hydronexus/frontend-leads @hydronexus/backend-leads
+/packages/config/           @hydronexus/core-maintainers
+
+# API Contracts & Documentation
+/contracts/                 @hydronexus/architecture-leads @hydronexus/backend-leads
+/docs/api-contract.md       @hydronexus/architecture-leads @hydronexus/backend-leads
+/docs/                      @hydronexus/core-maintainers
+
+# Backend Service Slot
+/backend/                   @hydronexus/backend-leads @hydronexus/backend-engineers
+
+# Infrastructure & Database
+/infra/                     @hydronexus/devops-team @hydronexus/db-admins
+/infra/docker/              @hydronexus/devops-team
+/infra/database/            @hydronexus/db-admins @hydronexus/backend-leads
+/docker-compose.yml         @hydronexus/devops-team
+
+# CI/CD Workflows
+/.github/workflows/         @hydronexus/devops-team

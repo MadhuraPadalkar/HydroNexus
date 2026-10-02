@@ -1,0 +1,22 @@
+{
+  "name": "hydronexus-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.34.3",
+  "scripts": {
+    "dev:officer": "pnpm --filter officer-portal dev",
+    "dev:citizen": "pnpm --filter citizen-portal dev",
+    "build": "pnpm -r build",
+    "build:officer": "pnpm --filter officer-portal build",
+    "build:citizen": "pnpm --filter citizen-portal build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint apps packages && oxfmt --check",
+    "format": "oxfmt"
+  },
+  "devDependencies": {
+    "eslint": "^10.11.0",
+    "oxfmt": "^0.2.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.71.0"
+  }
+}

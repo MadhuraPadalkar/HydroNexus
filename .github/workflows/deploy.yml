@@ -1,0 +1,62 @@
+name: Deploy (Disabled Template)
+
+# This deployment workflow is manually triggered and disabled by default.
+# Activate only after backend implementation is completed and environment secrets are configured.
+on:
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'Target Deployment Environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy-frontends:
+    name: Deploy Frontend Portals
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # TODO: Step 1 - Authenticate with Vercel / Netlify / AWS S3 + CloudFront
+      # - name: Deploy Officer Portal to Vercel
+      #   uses: amondnet/vercel-action@v25
+      #   with:
+      #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+      #     vercel-project-id: ${{ secrets.OFFICER_PORTAL_PROJECT_ID }}
+      #     working-directory: ./apps/officer-portal
+
+      # TODO: Step 2 - Deploy Citizen Portal to Vercel
+      # - name: Deploy Citizen Portal to Vercel
+      #   uses: amondnet/vercel-action@v25
+      #   with:
+      #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+      #     vercel-project-id: ${{ secrets.CITIZEN_PORTAL_PROJECT_ID }}
+      #     working-directory: ./apps/citizen-portal
+
+      - name: Standalone placeholder notice
+        run: |
+          echo "Deployment pipeline is currently inactive."
+          echo "Follow the step-by-step Go-Live checklist in docs/deployment.md to activate production deployments."
+
+  # ============================================================================
+  # BACKEND DEPLOYMENT JOB SLOT
+  # ============================================================================
+  # deploy-backend:
+  #   name: Deploy Backend & Run Migrations
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: Run Database Migrations
+  #       run: |
+  #         # TODO: Execute DB migrations against managed database (e.g. Supabase, RDS, Neon)
+  #     - name: Deploy API Service to Container Host (Render / Railway / ECS / VPS)
+  #       run: |
+  #         # TODO: Trigger deployment webhook or push Docker image to ECR/GHCR

@@ -1,0 +1,899 @@
+openapi: 3.0.3
+info:
+  title: HydroNexus Water Management API
+  version: 1.0.0
+  description: >
+    Production-ready REST API specification for the HydroNexus Municipal Water Management System.
+    Serves both the Officer Operations Portal (port 5173) and Citizen Portal (port 5174).
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development backend server
+  - url: https://api.water.municipality.gov.in/api/v1
+    description: Production API gateway
+
+paths:
+  /auth/officer/login:
+    post:
+      summary: Officer authentication
+      description: Authenticates an officer using municipal email credentials and issues a JWT token.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: suresh.patil@kmcwater.gov.in
+                password:
+                  type: string
+                  format: password
+                  example: StrongPassword#123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfficerSessionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/citizen/otp/request:
+    post:
+      summary: Request citizen login OTP
+      description: Initiates phone-based OTP authentication for citizen access.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone:
+                  type: string
+                  example: '9876543210'
+      responses:
+        '200':
+          description: OTP dispatched
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: object
+                    properties:
+                      otpSent: { type: boolean, example: true }
+
+  /auth/citizen/otp/verify:
+    post:
+      summary: Verify citizen OTP
+      description: Validates SMS OTP and issues a citizen session JWT.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, otp]
+              properties:
+                phone:
+                  type: string
+                  example: '9876543210'
+                otp:
+                  type: string
+                  example: '123456'
+      responses:
+        '200':
+          description: Verification successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitizenSessionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /complaints:
+    get:
+      summary: List complaints
+      description: Returns complaints filtered by type, ward, or status.
+      tags: [Complaints]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: string
+          description: Optional filter query (e.g. status or category)
+      responses:
+        '200':
+          description: List of complaints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Complaint'
+    post:
+      summary: Submit complaint
+      description: Files a new citizen water grievance.
+      tags: [Complaints]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewComplaintRequest'
+      responses:
+        '201':
+          description: Complaint created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/Complaint'
+
+  /complaints/{id}:
+    patch:
+      summary: Update complaint
+      description: Updates status, priority, or field assignment of a complaint.
+      tags: [Complaints]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [Pending, In Progress, Resolved, Escalated]
+                priority:
+                  type: string
+                  enum: [Low, Medium, High, Critical]
+                assigned:
+                  type: string
+      responses:
+        '200':
+          description: Complaint updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/Complaint'
+
+  /supply/schedule:
+    get:
+      summary: Get water supply schedule
+      description: Returns distribution schedules per ward and zone.
+      tags: [Supply]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SupplyScheduleItem'
+
+  /supply/outages:
+    get:
+      summary: Get active and scheduled outages
+      tags: [Supply]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Outage'
+
+  /supply/maintenance:
+    get:
+      summary: Get maintenance tasks
+      tags: [Supply]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MaintenanceTask'
+
+  /nrw/metrics:
+    get:
+      summary: Get Non-Revenue Water metrics by DMA zone
+      tags: [NRW]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NRWZoneMetric'
+
+  /nrw/leakages:
+    get:
+      summary: Get reported leakage telemetry incidents
+      tags: [NRW]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LeakageIncident'
+
+  /citizens:
+    get:
+      summary: Query citizen consumer directory
+      tags: [Citizens]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CitizenRecord'
+
+  /citizens/applications:
+    get:
+      summary: List new water connection applications
+      tags: [Citizens]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WaterConnectionApplication'
+
+  /citizens/requests:
+    get:
+      summary: List special service requests (tankers, meter tests)
+      tags: [Citizens]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceRequest'
+
+  /billing/bills:
+    get:
+      summary: Get billing history for authenticated consumer
+      tags: [Billing]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Bill'
+
+  /billing/usage:
+    get:
+      summary: Get consumption trend data points
+      tags: [Billing]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UsageDataPoint'
+
+  /billing/pay:
+    post:
+      summary: Process municipal water utility bill payment
+      tags: [Billing]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [billId]
+              properties:
+                billId: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      paid: { type: boolean, example: true }
+                      transactionId: { type: string, example: 'TXN-984210' }
+
+  /alerts:
+    get:
+      summary: Get active emergency notices and advisories
+      tags: [Alerts]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Alert'
+    post:
+      summary: Broadcast emergency water alert to citizens
+      tags: [Alerts]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAlertRequest'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    $ref: '#/components/schemas/Alert'
+
+  /notices:
+    get:
+      summary: List public circulars and announcements
+      tags: [Alerts]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notice'
+
+  /flood/gauges:
+    get:
+      summary: Get river telemetry gauge station water levels
+      tags: [Flood]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GaugeStation'
+
+  /flood/rainfall:
+    get:
+      summary: Get precipitation telemetry and forecast
+      tags: [Flood]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RainfallData'
+
+  /admin/officers:
+    get:
+      summary: List municipal staff and field operator directory
+      tags: [Admin]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OfficerUser'
+
+  /admin/permissions:
+    get:
+      summary: Get role-based access control matrix
+      tags: [Admin]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RolePermissions'
+
+  /admin/settings:
+    get:
+      summary: Retrieve system threshold settings
+      tags: [Admin]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    $ref: '#/components/schemas/SystemSettingsConfig'
+
+  /admin/audit-logs:
+    get:
+      summary: Retrieve system security and action audit trail
+      tags: [Admin]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditLog'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    UnauthorizedError:
+      description: Authentication token missing, invalid, or expired
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+  schemas:
+    ApiError:
+      type: object
+      required: [success, error]
+      properties:
+        success: { type: boolean, example: false }
+        error:
+          type: object
+          required: [message]
+          properties:
+            message: { type: string, example: 'Unauthorized access' }
+            code: { type: string, example: 'AUTH_UNAUTHORIZED' }
+            status: { type: integer, example: 401 }
+            details: { type: object }
+
+    OfficerSessionResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          properties:
+            token: { type: string, example: 'jwt.token.string' }
+            user:
+              type: object
+              properties:
+                id: { type: string, example: 'USR-001' }
+                name: { type: string, example: 'Suresh Patil' }
+                role: { type: string, example: 'Admin' }
+                email: { type: string, example: 'suresh.patil@kmcwater.gov.in' }
+                phone: { type: string, example: '+91 98220 12345' }
+                department: { type: string, example: 'Water Supply Operations' }
+                zone: { type: string, example: 'Central Zone' }
+
+    CitizenSessionResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          properties:
+            token: { type: string, example: 'jwt.token.string' }
+            user:
+              type: object
+              properties:
+                id: { type: string, example: 'CIT-78192' }
+                name: { type: string, example: 'Sunita Anand Patil' }
+                role: { type: string, example: 'Citizen' }
+                phone: { type: string, example: '9876543210' }
+                ward: { type: string, example: 'Ward 12 - Rankala' }
+                consumerId: { type: string, example: 'KMC-CON-90214' }
+
+    Complaint:
+      type: object
+      required: [id, type, ward]
+      properties:
+        id: { type: string, example: 'CMP-2024-0891' }
+        type: { type: string, example: 'Leakage' }
+        citizen: { type: string, example: 'Ramesh Shinde' }
+        ward: { type: string, example: 'Kasba Bawada' }
+        address: { type: string, example: 'Plot 14, Sector 4, Kasba Bawada' }
+        location: { type: string, example: 'Kasba Bawada Chowk' }
+        phone: { type: string, example: '9876543210' }
+        reported: { type: string, example: '11 Sep, 07:40' }
+        date: { type: string, example: '11 Sep 2026' }
+        assigned: { type: string, example: 'Anil Jadhav' }
+        priority:
+          type: string
+          enum: [Low, Medium, High, Critical]
+          example: Critical
+        status:
+          type: string
+          enum: [Pending, In Progress, Resolved, Escalated]
+          example: In Progress
+        description: { type: string, example: 'Major pipeline burst near chowk' }
+        updated: { type: string, example: '11 Sep, 09:00' }
+        icon: { type: string, example: 'water_damage' }
+
+    NewComplaintRequest:
+      type: object
+      required: [type, ward, description]
+      properties:
+        type: { type: string, example: 'Leakage' }
+        ward: { type: string, example: 'Ward 12 - Rankala' }
+        address: { type: string, example: 'Rankala Lake Road, Gate 3' }
+        description: { type: string, example: 'Water overflowing from underground pipe' }
+        priority: { type: string, enum: [Low, Medium, High, Critical], default: Medium }
+
+    SupplyScheduleItem:
+      type: object
+      properties:
+        zone: { type: string, example: 'Zone A (Rankala)' }
+        morning: { type: string, example: '6:00–8:30 AM' }
+        evening: { type: string, example: '6:00–8:00 PM' }
+        today: { type: boolean, example: true }
+        frequency: { type: string, example: 'Daily' }
+        flowRate: { type: string, example: '320 L/min' }
+        pressure: { type: string, example: '2.1 bar' }
+
+    Outage:
+      type: object
+      properties:
+        id: { type: string, example: 'OUT-101' }
+        title: { type: string, example: 'Pipeline Maintenance Outage' }
+        affectedAreas:
+          type: array
+          items: { type: string }
+          example: ['Ward 10', 'Ward 11', 'Ward 12']
+        startTime: { type: string, example: '12 Sep 2026, 06:00 AM' }
+        estimatedEndTime: { type: string, example: '12 Sep 2026, 02:00 PM' }
+        reason: { type: string, example: 'Annual valve replacement' }
+        status: { type: string, enum: [Scheduled, Ongoing, Resolved], example: Scheduled }
+        alternativeArrangements: { type: string, example: '3 Water tankers dispatched' }
+
+    MaintenanceTask:
+      type: object
+      properties:
+        id: { type: string, example: 'MNT-404' }
+        facility: { type: string, example: 'Bawada Water Treatment Plant' }
+        taskType: { type: string, example: 'Pump Overhaul' }
+        scheduledDate: { type: string, example: '15 Sep 2026' }
+        status: { type: string, enum: [Scheduled, In Progress, Completed], example: Scheduled }
+        assignedTeam: { type: string, example: 'Mech Team 2' }
+
+    NRWZoneMetric:
+      type: object
+      properties:
+        zoneId: { type: string, example: 'DMA-01' }
+        zoneName: { type: string, example: 'Kasba Bawada DMA' }
+        inflowMLD: { type: number, example: 14.8 }
+        billedMLD: { type: number, example: 9.6 }
+        nrwPercentage: { type: number, example: 35.1 }
+        targetPercentage: { type: number, example: 20.0 }
+        status: { type: string, enum: [Good, Warning, Critical], example: Warning }
+
+    LeakageIncident:
+      type: object
+      properties:
+        id: { type: string, example: 'LKG-902' }
+        sensorId: { type: string, example: 'PRS-BW-04' }
+        location: { type: string, example: 'Ring Road near Valve 12' }
+        estimatedLossLPH: { type: number, example: 1200 }
+        detectedAt: { type: string, example: '10 Sep 2026, 14:15' }
+        status: { type: string, enum: [Detected, Investigating, Repaired], example: Investigating }
+
+    CitizenRecord:
+      type: object
+      properties:
+        consumerNumber: { type: string, example: 'KMC-CON-90214' }
+        name: { type: string, example: 'Sunita Anand Patil' }
+        phone: { type: string, example: '9876543210' }
+        ward: { type: string, example: 'Ward 12 - Rankala' }
+        address: { type: string, example: '14/B Shivaji Park' }
+        connectionType: { type: string, example: 'Domestic Metered' }
+        pipeSize: { type: string, example: '15 mm' }
+        status: { type: string, enum: [Active, Suspended, Disconnected], example: Active }
+        balanceAmount: { type: number, example: 480 }
+
+    WaterConnectionApplication:
+      type: object
+      properties:
+        applicationId: { type: string, example: 'APP-2026-041' }
+        applicantName: { type: string, example: 'Mahesh Kadam' }
+        appliedDate: { type: string, example: '02 Sep 2026' }
+        ward: { type: string, example: 'Ward 8 - Shahupuri' }
+        propertyType: { type: string, example: 'Residential' }
+        status: { type: string, enum: [Pending, Site Inspection, Approved, Rejected], example: Pending }
+        documentsVerified: { type: boolean, example: true }
+
+    ServiceRequest:
+      type: object
+      properties:
+        id: { type: string, example: 'SRQ-882' }
+        citizenName: { type: string, example: 'Rohit Kulkarni' }
+        phone: { type: string, example: '9822100000' }
+        ward: { type: string, example: 'Ward 5' }
+        address: { type: string, example: 'Flat 401, Galaxy Apts' }
+        serviceType: { type: string, example: 'Tanker Request' }
+        requestedDate: { type: string, example: '11 Sep 2026' }
+        status: { type: string, enum: [Pending, Assigned, En Route, Completed], example: Assigned }
+        vehicleNumber: { type: string, example: 'MH-09-CV-2011' }
+        driverName: { type: string, example: 'Raju Salokhe' }
+
+    Bill:
+      type: object
+      properties:
+        id: { type: string, example: 'BIL-2026-09-4872' }
+        consumerNumber: { type: string, example: 'KMC-W12-004872' }
+        period: { type: string, example: 'September 2026' }
+        dueDate: { type: string, example: '20 September 2026' }
+        amount: { type: number, example: 480 }
+        consumptionKL: { type: number, example: 3.2 }
+        status: { type: string, enum: [Paid, Unpaid, Overdue], example: Unpaid }
+        billDate: { type: string, example: '01 Sep 2026' }
+
+    UsageDataPoint:
+      type: object
+      properties:
+        month: { type: string, example: 'Aug' }
+        usage: { type: number, example: 6800 }
+        cost: { type: number, example: 420 }
+
+    Alert:
+      type: object
+      properties:
+        id: { type: string, example: '1' }
+        severity: { type: string, enum: [critical, warning, info, success], example: critical }
+        icon: { type: string, example: 'warning' }
+        title: { type: string, example: 'Emergency Water Outage' }
+        body: { type: string, example: 'Pipeline burst on Shahupuri Ring Road.' }
+        time: { type: string, example: 'Today, 9:15 AM' }
+        targetWards:
+          type: array
+          items: { type: string }
+          example: ['Ward 10', 'Ward 11', 'Ward 12']
+
+    NewAlertRequest:
+      type: object
+      required: [title, body, severity]
+      properties:
+        title: { type: string, example: 'Planned Shutdown' }
+        body: { type: string, example: 'Power cut at Bawada treatment plant' }
+        severity: { type: string, enum: [critical, warning, info, success] }
+        targetWards:
+          type: array
+          items: { type: string }
+
+    Notice:
+      type: object
+      properties:
+        id: { type: string, example: '1' }
+        title: { type: string, example: 'Water Conservation Drive' }
+        category: { type: string, example: 'Awareness' }
+        date: { type: string, example: '9 Sep 2026' }
+        content: { type: string, example: 'KMC urges citizens to adopt water-saving practices.' }
+        priority: { type: string, enum: [High, Normal, Low], example: Normal }
+
+    GaugeStation:
+      type: object
+      properties:
+        id: { type: string, example: 'STN-PANCH-01' }
+        name: { type: string, example: 'Panchganga Ghat' }
+        level: { type: number, example: 34.2 }
+        change: { type: string, example: '+0.4m/hr' }
+        status: { type: string, enum: [Normal, Watch, Moderate, Major], example: Watch }
+        maxSafe: { type: number, example: 40.0 }
+        danger: { type: number, example: 43.0 }
+
+    RainfallData:
+      type: object
+      properties:
+        day: { type: string, example: 'Mon' }
+        rainfall: { type: number, example: 45 }
+        forecast: { type: number, example: 60 }
+
+    OfficerUser:
+      type: object
+      properties:
+        id: { type: string, example: 'USR-OFFICER-001' }
+        name: { type: string, example: 'Suresh Patil' }
+        email: { type: string, example: 'suresh.patil@kmcwater.gov.in' }
+        phone: { type: string, example: '+91 98220 12345' }
+        role: { type: string, enum: [Admin, Engineer, Supervisor, Operator], example: Admin }
+        department: { type: string, example: 'Water Supply Operations' }
+        zone: { type: string, example: 'Central Zone' }
+        status: { type: string, enum: [Active, Inactive], example: Active }
+        lastActive: { type: string, example: 'Just now' }
+
+    RolePermissions:
+      type: object
+      properties:
+        role: { type: string, example: 'Admin' }
+        manageUsers: { type: boolean, example: true }
+        manageRoles: { type: boolean, example: true }
+        viewAudit: { type: boolean, example: true }
+        systemSettings: { type: boolean, example: true }
+        editSchedules: { type: boolean, example: true }
+        approveRequests: { type: boolean, example: true }
+
+    SystemSettingsConfig:
+      type: object
+      properties:
+        autoFloodAlert: { type: boolean, example: true }
+        floodMinor: { type: string, example: '38.0 m' }
+        floodModerate: { type: string, example: '41.0 m' }
+        floodMajor: { type: string, example: '43.0 m' }
+        nrwWarningThreshold: { type: string, example: '25%' }
+
+    AuditLog:
+      type: object
+      properties:
+        id: { type: string, example: 'AUD-9912' }
+        timestamp: { type: string, example: '11 Sep 2026, 09:15:22' }
+        actor: { type: string, example: 'Suresh Patil' }
+        action: { type: string, example: 'UPDATE_SCHEDULE' }
+        target: { type: string, example: 'Ward 12 Schedule' }
+        ipAddress: { type: string, example: '192.168.1.104' }
+        details: { type: string, example: 'Extended morning supply by 30 mins' }

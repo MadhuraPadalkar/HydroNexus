@@ -1,0 +1,88 @@
+services:
+  # ============================================================================
+  # OFFICER PORTAL (Internal Municipal Operations)
+  # ============================================================================
+  officer-portal:
+    container_name: hydronexus-officer-portal
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile
+      args:
+        APP_NAME: officer-portal
+    ports:
+      - "${OFFICER_PORT:-5173}:80"
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+      - VITE_USE_MOCKS=${VITE_USE_MOCKS:-true}
+    restart: unless-stopped
+    networks:
+      - hydronexus-network
+
+  # ============================================================================
+  # CITIZEN PORTAL (Citizen Facing Services & Grievances)
+  # ============================================================================
+  citizen-portal:
+    container_name: hydronexus-citizen-portal
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile
+      args:
+        APP_NAME: citizen-portal
+    ports:
+      - "${CITIZEN_PORT:-5174}:80"
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+      - VITE_USE_MOCKS=${VITE_USE_MOCKS:-true}
+    restart: unless-stopped
+    networks:
+      - hydronexus-network
+
+  # ============================================================================
+  # BACKEND SERVICE PLACEHOLDER
+  # To be activated once the backend team supplies backend/Dockerfile
+  # ============================================================================
+  # backend:
+  #   container_name: hydronexus-backend
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "${BACKEND_PORT:-8000}:8000"
+  #   environment:
+  #     PORT: 8000
+  #     DATABASE_URL: postgres://hydronexus_user:hydronexus_password@database:5432/hydronexus_db
+  #     JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_key_hydronexus}
+  #     CORS_ORIGINS: http://localhost:5173,http://localhost:5174
+  #   depends_on:
+  #     - database
+  #   restart: unless-stopped
+  #   networks:
+  #     - hydronexus-network
+
+  # ============================================================================
+  # DATABASE SERVICE PLACEHOLDER
+  # Managed PostgreSQL instance for backend team local development
+  # ============================================================================
+  # database:
+  #   container_name: hydronexus-db
+  #   image: postgres:16-alpine
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     POSTGRES_USER: hydronexus_user
+  #     POSTGRES_PASSWORD: hydronexus_password
+  #     POSTGRES_DB: hydronexus_db
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #     - ./infra/database/migrations:/docker-entrypoint-initdb.d
+  #   restart: unless-stopped
+  #   networks:
+  #     - hydronexus-network
+
+networks:
+  hydronexus-network:
+    driver: bridge
+
+# volumes:
+#   postgres_data:
+#     driver: local

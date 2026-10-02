@@ -1,0 +1,17 @@
+node_modules
+dist
+build
+.cache
+.env
+.env.*
+!.env.example
+.figma
+.DS_Store
+*.log
+*-debug.log*
+logs/
+.vscode/*
+!.vscode/extensions.json
+.idea
+.vite/
+*.tsbuildinfo

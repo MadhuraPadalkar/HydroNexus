@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  frontends:
+    name: Frontend Quality & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.3
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Code formatting & lint verification
+        run: pnpm run lint
+
+      - name: Static type checking
+        run: pnpm run typecheck
+
+      - name: Build production bundles
+        run: pnpm run build
+
+  # ============================================================================
+  # BACKEND CI JOB SLOT
+  # Uncomment and configure once the backend service stack is finalized
+  # ============================================================================
+  # backend:
+  #   name: Backend Test Suite
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: Run Backend Tests
+  #       run: |
+  #         cd backend
+  #         # e.g., npm test / cargo test / pytest / go test ./...
