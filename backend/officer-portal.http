@@ -1,0 +1,415 @@
+# HydroNexus Officer Backend — request collection.
+# Run against a local dev server: `npm run dev` (port 8000), then execute
+# each request top-to-bottom. Set @token from the login response first.
+# Covers every officer-facing endpoint (openapi.yaml paths + OFFICER-EXT).
+
+@base = http://localhost:8000/api/v1
+@token = PASTE_ADMIN_JWT_FROM_LOGIN_HERE
+@citizenToken = PASTE_CITIZEN_JWT_HERE
+
+### 0. Health (no auth)
+GET http://localhost:8000/health
+
+### 1. Officer login (no auth) — seed password is Password123!
+POST {{base}}/auth/officer/login
+Content-Type: application/json
+
+{
+  "email": "suresh.patil@kmcwater.gov.in",
+  "password": "Password123!"
+}
+
+### 2. Dashboard summary (KPIs)
+GET {{base}}/dashboard/summary
+Authorization: Bearer {{token}}
+
+### 3. Overall water status
+GET {{base}}/dashboard/water-status
+Authorization: Bearer {{token}}
+
+### 4. List complaints (no filter)
+GET {{base}}/complaints
+Authorization: Bearer {{token}}
+
+### 5. List complaints filtered by status
+GET {{base}}/complaints?filter=In%20Progress
+Authorization: Bearer {{token}}
+
+### 6. List complaints by ward + category
+GET {{base}}/complaints?ward=Kasba%20Bawada&category=Leakage
+Authorization: Bearer {{token}}
+
+### 7. Complaint detail
+GET {{base}}/complaints/CMP-2024-0891
+Authorization: Bearer {{token}}
+
+### 8. Assign complaint to engineer (creates work order)
+POST {{base}}/complaints/CMP-2024-0889/assign
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "engineer": "Anil Jadhav",
+  "notes": "Burst main suspected, take excavation kit"
+}
+
+### 9. Update complaint status (citizen-side reads this)
+PATCH {{base}}/complaints/CMP-2024-0889
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "In Progress",
+  "priority": "High"
+}
+
+### 10. Create work order
+POST {{base}}/work-orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Valve chamber clean-up — Shivaji Peth",
+  "ward": "Shivaji Peth",
+  "assignedTo": "Deepak Kulkarni",
+  "priority": "Medium"
+}
+
+### 11. List work orders
+GET {{base}}/work-orders?status=Open
+Authorization: Bearer {{token}}
+
+### 12. Work order detail (replace WO id from #10/#11)
+GET {{base}}/work-orders/WO-2026-001
+Authorization: Bearer {{token}}
+
+### 13. Update work order (replace WO id)
+PATCH {{base}}/work-orders/WO-2026-001
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "In Progress"
+}
+
+### 14. Ward-wise supply schedule
+GET {{base}}/supply/schedule
+Authorization: Bearer {{token}}
+
+### 15. Update ward supply row
+PUT {{base}}/supply/schedule
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "ward": "Mangalwar Peth",
+  "zone": "Central",
+  "scheduled": "06:00–09:00",
+  "actual": "06:05–09:00",
+  "pressure": 66,
+  "status": "Delayed"
+}
+
+### 16. List outages
+GET {{base}}/supply/outages?status=Active
+Authorization: Bearer {{token}}
+
+### 17. Create outage notice (auto-notify writes citizen-visible alert)
+POST {{base}}/supply/outages
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "ward": "Rankala",
+  "zone": "West Zone",
+  "reason": "Annual valve replacement",
+  "type": "Scheduled",
+  "startTime": "12 Sep 2026, 06:00 AM",
+  "estimatedRestoration": "12 Sep 2026, 02:00 PM",
+  "affectedPopulation": 5200,
+  "tankersDispatched": 3,
+  "autoNotify": true
+}
+
+### 18. Update outage (replace OUT id from #16/#17)
+PATCH {{base}}/supply/outages/OUT-2024-088
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "Active",
+  "tankersDispatched": 3
+}
+
+### 19. List maintenance
+GET {{base}}/supply/maintenance?status=Scheduled
+Authorization: Bearer {{token}}
+
+### 20. Create maintenance activity
+POST {{base}}/supply/maintenance
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Chlorinator calibration — Bawada WTP",
+  "type": "Preventive",
+  "ward": "Kasba Bawada",
+  "scheduledDate": "15 Sep 2026",
+  "assignedTeam": "Unit A - Mechanical",
+  "priority": "Medium"
+}
+
+### 21. Update maintenance (replace MNT id)
+PATCH {{base}}/supply/maintenance/MNT-092
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "In Progress"
+}
+
+### 22. NRW zone accounting
+GET {{base}}/nrw/metrics
+Authorization: Bearer {{token}}
+
+### 23. City-wide NRW summary (computed)
+GET {{base}}/nrw/summary
+Authorization: Bearer {{token}}
+
+### 24. Leakage incidents
+GET {{base}}/nrw/leakages
+Authorization: Bearer {{token}}
+
+### 25. Leakage analysis (trend + high-risk zones)
+GET {{base}}/nrw/leakage-analysis
+Authorization: Bearer {{token}}
+
+### 26. Multi-ward comparison (2–4 wards)
+POST {{base}}/nrw/compare
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "wards": ["Kasba Bawada", "Shahupuri", "Rajarampuri"]
+}
+
+### 27. List/search citizens
+GET {{base}}/citizens?search=9876543210
+Authorization: Bearer {{token}}
+
+### 28. Citizen detail
+GET {{base}}/citizens/CIT-01
+Authorization: Bearer {{token}}
+
+### 29. List wards
+GET {{base}}/wards
+Authorization: Bearer {{token}}
+
+### 30. Ward detail
+GET {{base}}/wards/ward-03
+Authorization: Bearer {{token}}
+
+### 31. Update ward metadata
+PATCH {{base}}/wards/ward-03
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "coveragePct": 84,
+  "status": "Watch"
+}
+
+### 32. Connection applications
+GET {{base}}/citizens/applications?status=Under%20Review
+Authorization: Bearer {{token}}
+
+### 33. Approve connection
+PATCH {{base}}/citizens/applications/APP-2026-104
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "action": "approve"
+}
+
+### 34. Reject connection (example)
+PATCH {{base}}/citizens/applications/APP-2026-103
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "action": "reject",
+  "note": "Incomplete ownership proof"
+}
+
+### 35. Service/tanker queue
+GET {{base}}/citizens/requests?status=Pending
+Authorization: Bearer {{token}}
+
+### 36. Dispatch tanker (approve -> dispatch -> delivered)
+PATCH {{base}}/citizens/requests/SR-2024-0440
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "En Route",
+  "vehicleNumber": "MH-09-T-4521",
+  "driverName": "Ravi Kamble"
+}
+
+### 37. Mark service delivered
+PATCH {{base}}/citizens/requests/SR-2024-0440
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "Completed",
+  "notes": "Delivered 5KL, acknowledgement signed"
+}
+
+### 38. Compose + send notification (citizen-side reads this)
+POST {{base}}/alerts
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Planned Shutdown — Rankala",
+  "body": "Supply to Rankala zone paused 6 AM–2 PM on 12 Sep for valve work. Tankers on standby.",
+  "type": "Supply",
+  "targetWards": ["Rankala"]
+}
+
+### 39. Notification history
+GET {{base}}/alerts
+Authorization: Bearer {{token}}
+
+### 40. Public notices
+GET {{base}}/notices
+Authorization: Bearer {{token}}
+
+### 41. Supply analytics
+GET {{base}}/analytics/supply
+Authorization: Bearer {{token}}
+
+### 42. Complaint analytics
+GET {{base}}/analytics/complaints?range=6m
+Authorization: Bearer {{token}}
+
+### 43. NRW analytics
+GET {{base}}/analytics/nrw
+Authorization: Bearer {{token}}
+
+### 44. Consumption analytics
+GET {{base}}/analytics/consumption
+Authorization: Bearer {{token}}
+
+### 45. Ward comparison analytics
+GET {{base}}/analytics/ward-comparison?wards=Kasba%20Bawada,Shahupuri,Rajarampuri
+Authorization: Bearer {{token}}
+
+### 46. Officer directory
+GET {{base}}/admin/officers
+Authorization: Bearer {{token}}
+
+### 47. Role permissions
+GET {{base}}/admin/permissions
+Authorization: Bearer {{token}}
+
+### 48. System settings
+GET {{base}}/admin/settings
+Authorization: Bearer {{token}}
+
+### 49. Audit logs
+GET {{base}}/admin/audit-logs
+Authorization: Bearer {{token}}
+
+### 50. Flood gauges (read-only, any officer role)
+GET {{base}}/flood/gauges
+Authorization: Bearer {{token}}
+
+### 51. Rainfall (read-only, any officer role)
+GET {{base}}/flood/rainfall
+Authorization: Bearer {{token}}
+
+### 52. Auth guard check (no token -> expect 401)
+GET {{base}}/complaints
+
+### 53. Unknown route with no token -> expect 404 (never 401)
+GET {{base}}/no-such-route
+
+### 54. Complaint status alias (api-client compat)
+PATCH {{base}}/complaints/CMP-2024-0890/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "In Progress"
+}
+
+### 55. Create officer (Admin only)
+POST {{base}}/admin/officers
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Tanker Ops Operator",
+  "email": "tanker.ops@kmcwater.gov.in",
+  "phone": "+91 9000000001",
+  "role": "Operator",
+  "department": "Tanker Operations",
+  "zone": "West Zone"
+}
+
+### 56. Update officer (Admin only)
+PATCH {{base}}/admin/officers/USR-002
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "zone": "Central Zone"
+}
+
+### 57. Update role permissions (Admin only, 404 for unknown role)
+PUT {{base}}/admin/permissions/Operator
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "role": "Operator",
+  "manageUsers": false,
+  "manageRoles": false,
+  "viewAudit": false,
+  "systemSettings": false,
+  "editSchedules": false,
+  "approveRequests": false
+}
+
+### 58. Update system settings (Admin only)
+PUT {{base}}/admin/settings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nrwWarningThreshold": "22"
+}
+
+### 59. Audit logs with filters (Admin, Supervisor)
+GET {{base}}/admin/audit-logs?module=Supply&severity=Info&q=SCHEDULE
+Authorization: Bearer {{token}}
+
+### 60. NRW zone volume update (Admin, Supervisor, Engineer)
+PUT {{base}}/nrw/zones/East%20Zone
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "inputVolumeKL": 1000,
+  "billedVolumeKL": 800
+}
+
+### 61. Public notices (no token -> 200)
+GET {{base}}/notices
+
+### 62. Citizen-role alert read (citizen JWT -> 200; POST -> 403)
+GET {{base}}/alerts
+Authorization: Bearer {{citizenToken}}
