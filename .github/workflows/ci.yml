@@ -37,6 +37,53 @@ jobs:
       - name: Build production bundles
         run: pnpm run build
 
+  database:
+    name: Database Migrations & Seeds
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: hydronexus_user
+          POSTGRES_PASSWORD: hydronexus_password
+          POSTGRES_DB: hydronexus_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U hydronexus_user -d hydronexus_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Apply schema migration
+        run: |
+          PGPASSWORD=hydronexus_password psql \
+            -h localhost -U hydronexus_user -d hydronexus_db \
+            -v ON_ERROR_STOP=1 \
+            -f infra/database/migrations/001_initial_schema.sql
+
+      - name: Apply seed data
+        run: |
+          for seed in infra/database/seeds/*.sql; do
+            echo "Applying $seed"
+            PGPASSWORD=hydronexus_password psql \
+              -h localhost -U hydronexus_user -d hydronexus_db \
+              -v ON_ERROR_STOP=1 \
+              -f "$seed"
+          done
+
+      - name: Verify seed counts
+        run: |
+          PGPASSWORD=hydronexus_password psql \
+            -h localhost -U hydronexus_user -d hydronexus_db \
+            -v ON_ERROR_STOP=1 \
+            -c "SELECT 'users=' || count(*) FROM users;" \
+            -c "SELECT 'complaints=' || count(*) FROM complaints;" \
+            -c "SELECT 'wards=' || count(*) FROM wards;"
+
   # ============================================================================
   # BACKEND CI JOB SLOT
   # Uncomment and configure once the backend service stack is finalized

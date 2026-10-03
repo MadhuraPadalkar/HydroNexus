@@ -4,6 +4,22 @@ export interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>
 }
 
+/**
+ * Resolve the backend base URL. Mock mode (VITE_USE_MOCKS !== "false") never
+ * reaches the network; real mode (VITE_USE_MOCKS=false) uses this value.
+ * Defaults to the local backend from contracts/openapi.yaml.
+ */
+export function getApiBaseUrl(): string {
+  // @ts-ignore - vite client env typing
+  const raw =
+    typeof import.meta !== "undefined" && import.meta.env
+      ? // @ts-ignore - vite client env typing
+        import.meta.env.VITE_API_BASE_URL as string | undefined
+      : undefined
+  const base = (raw || "http://localhost:8000/api/v1").trim()
+  return base.replace(/\/+$/, "")
+}
+
 export class HttpClient {
   private baseUrl: string
   private tokenKey: string
@@ -11,6 +27,15 @@ export class HttpClient {
   constructor(baseUrl = "", tokenKey = "hydronexus_token") {
     this.baseUrl = baseUrl
     this.tokenKey = tokenKey
+  }
+
+  /** Override the base URL at runtime (used by tests / portal startup). */
+  configure(baseUrl: string) {
+    this.baseUrl = baseUrl.replace(/\/+$/, "")
+  }
+
+  getBaseUrl(): string {
+    return this.baseUrl
   }
 
   setToken(token: string) {
@@ -140,4 +165,12 @@ export class HttpClient {
   }
 }
 
-export const http = new HttpClient()
+export const http = new HttpClient(getApiBaseUrl())
+
+// Keep the singleton in sync when Vite injects env after module init.
+try {
+  const resolved = getApiBaseUrl()
+  if (resolved && resolved !== http.getBaseUrl()) http.configure(resolved)
+} catch {
+  // non-browser / test runtimes without import.meta — ignore
+}

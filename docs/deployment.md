@@ -4,6 +4,23 @@ This document specifies the planned full-stack deployment strategy for the Hydro
 
 ---
 
+## 0. Local Full-Stack (Docker Compose)
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+This starts PostgreSQL 16 (`database`, auto-migrated + seeded — see
+`infra/database/README.md`) plus both portals. The backend service block in
+`docker-compose.yml` is ready to uncomment once Person 2/3 add
+`backend/Dockerfile`; until then the portals run with `VITE_USE_MOCKS=true`
+by default. For real-API mode set `VITE_USE_MOCKS=false` and
+`VITE_API_BASE_URL=http://localhost:8000/api/v1` (see
+`apps/officer-portal/.env.example` and `docs/backend-integration.md`).
+
+---
+
 ## 1. Architecture Overview
 
 ```

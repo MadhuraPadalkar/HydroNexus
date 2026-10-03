@@ -5,8 +5,10 @@ import {
   nrwApi,
   citizensApi,
   alertsApi,
+  billingApi,
   floodApi,
   adminApi,
+  workOrdersApi,
   type Complaint,
   type SupplyScheduleItem,
   type Outage,
@@ -17,12 +19,16 @@ import {
   type WaterConnectionApplication,
   type ServiceRequest,
   type Alert,
+  type Bill,
+  type UsageDataPoint,
   type GaugeStation,
+  type Notice,
   type RainfallData,
   type OfficerUser,
   type RolePermissions,
   type SystemSettingsConfig,
   type AuditLog,
+  type WorkOrder,
 } from "@/services/api"
 
 export function useComplaintsData(filter?: string) {
@@ -183,6 +189,90 @@ export function useAlertsData() {
   }, [fetchData])
 
   return { alerts, loading, error, refetch: fetchData }
+}
+
+export function useNoticesData() {
+  const [notices, setNotices] = useState<Notice[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await alertsApi.getNotices()
+      setNotices(res.data)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to fetch notices")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  return { notices, loading, error, refetch: fetchData }
+}
+
+export function useBillingData() {
+  const [bills, setBills] = useState<Bill[]>([])
+  const [usage, setUsage] = useState<UsageDataPoint[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [bRes, uRes] = await Promise.all([
+        billingApi.getBills(),
+        billingApi.getUsage(),
+      ])
+      setBills(bRes.data)
+      setUsage(uRes.data)
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch billing data",
+      )
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  return { bills, usage, loading, error, refetch: fetchData }
+}
+
+export function useWorkOrdersData(complaintId?: string) {
+  const [workOrders, setWorkOrders] = useState<WorkOrder[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await workOrdersApi.getWorkOrders(complaintId)
+      setWorkOrders(res.data)
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch work orders",
+      )
+    } finally {
+      setLoading(false)
+    }
+  }, [complaintId])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  return { workOrders, loading, error, refetch: fetchData }
 }
 
 export function useFloodData() {

@@ -49,7 +49,7 @@ export interface Complaint {
   date?: string
   assigned?: string
   priority?: "Low" | "Medium" | "High" | "Critical"
-  status: "Open" | "In Progress" | "Resolved"
+  status: "Open" | "Pending" | "In Progress" | "Resolved" | "Escalated"
   description: string
   updated?: string
   icon?: string
@@ -64,6 +64,21 @@ export interface Complaint {
     text: string
     isOfficer?: boolean
   }>
+}
+
+// Work Orders (field tasks linked to complaints / maintenance)
+export interface WorkOrder {
+  id: string
+  complaintId?: string
+  title: string
+  type: "Preventive" | "Corrective" | "Inspection"
+  ward: string
+  scheduledDate: string
+  status: "Pending" | "Assigned" | "In Progress" | "Completed" | "Cancelled"
+  priority: "Low" | "Medium" | "High" | "Critical"
+  assignedTeam: string
+  assignedTo?: string
+  notes?: string
 }
 
 // Supply & Outages

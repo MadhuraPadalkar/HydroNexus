@@ -38,8 +38,9 @@ services:
       - hydronexus-network
 
   # ============================================================================
-  # BACKEND SERVICE PLACEHOLDER
-  # To be activated once the backend team supplies backend/Dockerfile
+  # BACKEND SERVICE (Person 2 + Person 3)
+  # Uncomment once backend/Dockerfile exists. The database below is already
+  # live; the backend only needs DATABASE_URL + JWT_SECRET + CORS_ORIGINS.
   # ============================================================================
   # backend:
   #   container_name: hydronexus-backend
@@ -54,35 +55,50 @@ services:
   #     JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_key_hydronexus}
   #     CORS_ORIGINS: http://localhost:5173,http://localhost:5174
   #   depends_on:
-  #     - database
+  #     database:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-qO-", "http://localhost:8000/api/v1/notices"]
+  #     interval: 30s
+  #     timeout: 5s
+  #     retries: 3
+  #     start_period: 20s
   #   restart: unless-stopped
   #   networks:
   #     - hydronexus-network
 
   # ============================================================================
-  # DATABASE SERVICE PLACEHOLDER
-  # Managed PostgreSQL instance for backend team local development
+  # DATABASE — PostgreSQL 16 (Person 4)
+  # Migrations + seeds auto-apply on first volume init via
+  # infra/database/migrations/*.sql and the /seeds mount.
   # ============================================================================
-  # database:
-  #   container_name: hydronexus-db
-  #   image: postgres:16-alpine
-  #   ports:
-  #     - "5432:5432"
-  #   environment:
-  #     POSTGRES_USER: hydronexus_user
-  #     POSTGRES_PASSWORD: hydronexus_password
-  #     POSTGRES_DB: hydronexus_db
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #     - ./infra/database/migrations:/docker-entrypoint-initdb.d
-  #   restart: unless-stopped
-  #   networks:
-  #     - hydronexus-network
+  database:
+    container_name: hydronexus-db
+    image: postgres:16-alpine
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-hydronexus_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hydronexus_password}
+      POSTGRES_DB: ${DB_NAME:-hydronexus_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/database/migrations:/docker-entrypoint-initdb.d
+      - ./infra/database/seeds:/seeds:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - hydronexus-network
 
 networks:
   hydronexus-network:
     driver: bridge
 
-# volumes:
-#   postgres_data:
-#     driver: local
+volumes:
+  postgres_data:
+    driver: local
