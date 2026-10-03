@@ -263,3 +263,29 @@ export interface AuditLog {
   time: string
   severity: "Info" | "Warning" | "Critical"
 }
+
+// Officer operations (added for the officer-facing backend; no existing
+// interface was modified).
+export interface WorkOrder {
+  id: string
+  complaintId?: string
+  title: string
+  ward: string
+  assignedTo: string
+  priority: "Low" | "Medium" | "High" | "Critical"
+  status: "Open" | "In Progress" | "On Hold" | "Completed" | "Cancelled"
+  createdAt: string
+  updatedAt: string
+  notes: string
+}
+
+export interface Ward {
+  id: string
+  name: string
+  zone: string
+  population: number
+  households: number
+  coveragePct: number
+  supplyHours: string
+  status: "Normal" | "Watch" | "Disrupted"
+}
