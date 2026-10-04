@@ -1,13 +1,14 @@
 import { useState } from "react"
 import { useNavigate, useOutletContext } from "react-router-dom"
 import { Icon, ScreenHeader } from "@/components/CommonUI"
+import { useLanguage } from "@/i18n/LanguageContext"
 import type { CitizenOutletContext } from "@/app/layouts/CitizenLayout"
 
 export default function ProfilePage() {
   const navigate = useNavigate()
   const { onMenu } = useOutletContext<CitizenOutletContext>()
   const onNavigate = (s: string) => navigate("/" + (s === "home" ? "" : s))
-  const [lang, setLang] = useState<"en" | "mr">("en")
+  const { lang, setLang, t } = useLanguage()
   const [notifSupply, setNotifSupply] = useState(true)
   const [notifBill, setNotifBill] = useState(true)
   const [notifAlerts, setNotifAlerts] = useState(true)
@@ -15,7 +16,7 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-col h-full bg-[#f8f9fb]">
       <div className="bg-white">
-        <ScreenHeader title="Profile & Settings" onMenu={onMenu} />
+        <ScreenHeader title={t.profile.title} onMenu={onMenu} />
       </div>
       <div className="flex-1 overflow-y-auto pb-24 pt-4 px-4 space-y-4 fade-in">
         {/* User Card */}
@@ -38,7 +39,7 @@ export default function ProfilePage() {
                   className="text-[#66affe]"
                 />
                 <span className="text-[#66affe] text-xs font-medium">
-                  Verified Citizen
+                  {t.profile.verified}
                 </span>
               </div>
             </div>
@@ -59,22 +60,34 @@ export default function ProfilePage() {
         {/* Connection Details */}
         <div className="card-elevated p-5">
           <div className="text-sm font-bold text-[#002045] mb-4">
-            Connection Details
+            {t.profile.connectionDetails}
           </div>
           {[
             {
-              label: "Connection ID",
+              label: t.profile.connectionId,
               value: "KMC-W12-004872",
               icon: "water_drop",
             },
-            { label: "Property Type", value: "Residential", icon: "home" },
-            { label: "Ward", value: "Ward 12 — Rankala", icon: "location_on" },
             {
-              label: "Zone",
+              label: t.profile.propertyType,
+              value: t.profile.residential,
+              icon: "home",
+            },
+            {
+              label: t.profile.ward,
+              value: "Ward 12 — Rankala",
+              icon: "location_on",
+            },
+            {
+              label: t.profile.zone,
               value: "Zone A (Rankala Sub-Division)",
               icon: "map",
             },
-            { label: "Meter No.", value: "MET-2204-8472", icon: "speed" },
+            {
+              label: t.profile.meterNo,
+              value: "MET-2204-8472",
+              icon: "speed",
+            },
           ].map((item) => (
             <div
               key={item.label}
@@ -98,7 +111,7 @@ export default function ProfilePage() {
         {/* Language */}
         <div className="card-elevated p-5">
           <div className="text-sm font-bold text-[#002045] mb-3">
-            Language / भाषा
+            {t.profile.language}
           </div>
           <div className="flex gap-2">
             {(["en", "mr"] as const).map((l) => (
@@ -113,7 +126,7 @@ export default function ProfilePage() {
                   cursor: "pointer",
                 }}
               >
-                {l === "en" ? "English" : "मराठी"}
+                {l === "en" ? t.profile.english : t.profile.marathi}
               </button>
             ))}
           </div>
@@ -122,24 +135,24 @@ export default function ProfilePage() {
         {/* Notification Preferences */}
         <div className="card-elevated p-5">
           <div className="text-sm font-bold text-[#002045] mb-4">
-            Notification Preferences
+            {t.profile.notifPrefs}
           </div>
           {[
             {
-              label: "Supply Schedule Updates",
-              sub: "Daily supply timings and changes",
+              label: t.profile.supplyUpdates,
+              sub: t.profile.supplyUpdatesSub,
               state: notifSupply,
               set: setNotifSupply,
             },
             {
-              label: "Bill Reminders",
-              sub: "Due dates and payment confirmations",
+              label: t.profile.billReminders,
+              sub: t.profile.billRemindersSub,
               state: notifBill,
               set: setNotifBill,
             },
             {
-              label: "Emergency Alerts",
-              sub: "Outages, quality advisories, floods",
+              label: t.profile.emergencyAlerts,
+              sub: t.profile.emergencyAlertsSub,
               state: notifAlerts,
               set: setNotifAlerts,
             },
@@ -175,15 +188,27 @@ export default function ProfilePage() {
         {/* Actions */}
         <div className="card-elevated overflow-hidden">
           {[
-            { icon: "help_outline", label: "Help & Support", color: "#0061a5" },
-            { icon: "privacy_tip", label: "Privacy Policy", color: "#0061a5" },
             {
-              icon: "description",
-              label: "Terms of Service",
+              icon: "help_outline",
+              label: t.profile.helpSupport,
               color: "#0061a5",
             },
-            { icon: "share", label: "Share App", color: "#1a6936" },
-          ].map((item, i) => (
+            {
+              icon: "privacy_tip",
+              label: t.profile.privacyPolicy,
+              color: "#0061a5",
+            },
+            {
+              icon: "description",
+              label: t.profile.termsOfService,
+              color: "#0061a5",
+            },
+            {
+              icon: "share",
+              label: t.profile.shareApp,
+              color: "#1a6936",
+            },
+          ].map((item) => (
             <button
               key={item.label}
               className="flex items-center gap-4 w-full px-5 py-4 border-b border-gray-100 last:border-0"
@@ -214,7 +239,7 @@ export default function ProfilePage() {
           style={{ background: "#ffdad6", border: "none", cursor: "pointer" }}
         >
           <Icon name="logout" size={20} className="text-[#ba1a1a]" />
-          Sign Out
+          {t.profile.signOut}
         </button>
 
         <div className="text-center pb-2">

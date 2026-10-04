@@ -1,31 +1,26 @@
 import { useState } from "react"
 import { useNavigate, useOutletContext } from "react-router-dom"
 import { Icon, StatusBadge, ScreenHeader } from "@/components/CommonUI"
-import {
-  complaints as initialComplaints,
-  type Complaint,
-} from "@/mocks/citizenData"
+import type { Complaint } from "@/services/api"
 import { useCitizenComplaints } from "@/hooks/useCitizenData"
 import { LoadingSpinner, EmptyState, ErrorMessage } from "@water/ui"
+import { useLanguage } from "@/i18n/LanguageContext"
 import type { CitizenOutletContext } from "@/app/layouts/CitizenLayout"
 
 export default function ComplaintsListPage() {
   const navigate = useNavigate()
   const { onMenu } = useOutletContext<CitizenOutletContext>()
-  const {
-    complaints: apiComplaints,
-    loading,
-    error,
-    refetch,
-  } = useCitizenComplaints()
-  const complaints =
-    apiComplaints.length > 0
-      ? apiComplaints as unknown as Complaint[]
-      : initialComplaints
+  const { t } = useLanguage()
+  const { complaints, loading, error, refetch } = useCitizenComplaints()
   const onComplaintDetail = (c: Complaint) => navigate("/complaints/" + c.id)
   const [filter, setFilter] = useState("All")
 
-  const filters = ["All", "Open", "In Progress", "Resolved"]
+  const filters = [
+    { id: "All", label: t.complaints.filters.all },
+    { id: "Open", label: t.complaints.filters.open },
+    { id: "In Progress", label: t.complaints.filters.inProgress },
+    { id: "Resolved", label: t.complaints.filters.resolved },
+  ]
   const filtered =
     filter === "All"
       ? complaints
@@ -34,40 +29,40 @@ export default function ComplaintsListPage() {
   return (
     <div className="flex flex-col h-full bg-[#f8f9fb]">
       <div className="bg-white">
-        <ScreenHeader title="My Complaints" onMenu={onMenu} />
+        <ScreenHeader title={t.complaints.title} onMenu={onMenu} />
         {/* Filter tabs */}
         <div className="flex gap-2 px-4 pb-3 overflow-x-auto">
           {filters.map((f) => (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
+              key={f.id}
+              onClick={() => setFilter(f.id)}
               className="flex-none px-4 py-2 rounded-full text-xs font-semibold transition-all"
               style={{
-                background: filter === f ? "#002045" : "#f0f2f5",
-                color: filter === f ? "#fff" : "#4a5060",
+                background: filter === f.id ? "#002045" : "#f0f2f5",
+                color: filter === f.id ? "#fff" : "#4a5060",
                 border: "none",
                 cursor: "pointer",
               }}
             >
-              {f}
+              {f.label}
             </button>
           ))}
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto pb-24 px-4 pt-3 space-y-3 fade-in">
-        {loading && <LoadingSpinner message="Fetching complaints..." />}
+        {loading && <LoadingSpinner message={t.complaints.loading} />}
         {error && (
           <ErrorMessage
-            title="Could not load complaints"
+            title={t.complaints.loadFailed}
             message={error}
             onRetry={refetch}
           />
         )}
         {!loading && !error && filtered.length === 0 && (
           <EmptyState
-            title="No complaints in this category"
-            description="You don't have any reported complaints under this filter status."
+            title={t.complaints.emptyTitle}
+            description={t.complaints.emptyBody}
             icon="assignment_turned_in"
           />
         )}
@@ -91,7 +86,7 @@ export default function ComplaintsListPage() {
                 }}
               >
                 <Icon
-                  name={c.icon}
+                  name={c.icon || "report_problem"}
                   size={24}
                   className={
                     c.status === "Open"

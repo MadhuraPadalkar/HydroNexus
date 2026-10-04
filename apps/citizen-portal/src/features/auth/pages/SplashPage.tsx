@@ -1,9 +1,11 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Icon } from "@/components/CommonUI"
+import { useLanguage } from "@/i18n/LanguageContext"
 
 export default function SplashPage() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -40,9 +42,9 @@ export default function SplashPage() {
           </div>
         </div>
         <p className="text-center text-white/75 text-[15px] leading-relaxed max-w-xs">
-          Smart Water Services
+          {t.splash.tagline1}
           <br />
-          for Kolhapur
+          {t.splash.tagline2}
         </p>
       </div>
 

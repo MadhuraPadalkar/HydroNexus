@@ -1,10 +1,12 @@
 import { useNavigate, useOutletContext } from "react-router-dom"
 import { Icon, ScreenHeader } from "@/components/CommonUI"
+import { useLanguage } from "@/i18n/LanguageContext"
 import type { CitizenOutletContext } from "@/app/layouts/CitizenLayout"
 
 export default function ServicesPage() {
   const navigate = useNavigate()
   const { onMenu } = useOutletContext<CitizenOutletContext>()
+  const { t } = useLanguage()
   const onNavigate = (s: string) =>
     navigate(
       "/" +
@@ -18,8 +20,7 @@ export default function ServicesPage() {
     {
       id: "connection",
       screen: "profile",
-      label: "Water Connection",
-      desc: "View or manage your account details",
+      item: t.services.items.connection,
       icon: "settings_input_component",
       bg: "#e8f1ff",
       color: "#0061a5",
@@ -27,8 +28,7 @@ export default function ServicesPage() {
     {
       id: "meter-services",
       screen: "report",
-      label: "Water Meter Services",
-      desc: "Report meter issues or request replacement",
+      item: t.services.items.meter,
       icon: "speed",
       bg: "#e8f1ff",
       color: "#0061a5",
@@ -36,8 +36,7 @@ export default function ServicesPage() {
     {
       id: "tanker-request",
       screen: "tanker-request",
-      label: "Request a Tanker",
-      desc: "Book an emergency water tanker",
+      item: t.services.items.tanker,
       icon: "local_shipping",
       bg: "#ffdea3",
       color: "#7c5800",
@@ -45,8 +44,7 @@ export default function ServicesPage() {
     {
       id: "other-requests",
       screen: "report",
-      label: "Other Service Requests",
-      desc: "General requests and queries",
+      item: t.services.items.other,
       icon: "assignment",
       bg: "#f0f2f5",
       color: "#4a5060",
@@ -56,7 +54,7 @@ export default function ServicesPage() {
   return (
     <div className="flex flex-col h-full bg-[#f8f9fb]">
       <div className="bg-white">
-        <ScreenHeader title="Water Services" onMenu={onMenu} />
+        <ScreenHeader title={t.services.title} onMenu={onMenu} />
       </div>
       <div className="flex-1 overflow-y-auto pb-24 px-4 pt-4 space-y-3 fade-in">
         {services.map((s) => (
@@ -73,9 +71,9 @@ export default function ServicesPage() {
             </div>
             <div className="flex-1">
               <div className="text-base font-bold text-[#1a1d24] mb-1">
-                {s.label}
+                {s.item.label}
               </div>
-              <div className="text-xs text-[#8a909c]">{s.desc}</div>
+              <div className="text-xs text-[#8a909c]">{s.item.desc}</div>
             </div>
             <Icon name="chevron_right" size={20} className="text-[#c8cdd6]" />
           </button>

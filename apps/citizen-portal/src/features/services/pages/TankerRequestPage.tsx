@@ -1,11 +1,13 @@
 import { useState } from "react"
 import { useNavigate, useOutletContext } from "react-router-dom"
 import { Icon, ScreenHeader } from "@/components/CommonUI"
+import { useLanguage } from "@/i18n/LanguageContext"
 import type { CitizenOutletContext } from "@/app/layouts/CitizenLayout"
 
 export default function TankerRequestPage() {
   const navigate = useNavigate()
   const { onMenu } = useOutletContext<CitizenOutletContext>()
+  const { t } = useLanguage()
   const onNavigate = (s: string) => navigate("/" + (s === "home" ? "" : s))
   const [urgency, setUrgency] = useState<"Normal" | "Urgent">("Normal")
   const [slot, setSlot] = useState("")
@@ -14,7 +16,7 @@ export default function TankerRequestPage() {
   if (submitted) {
     return (
       <div className="flex flex-col h-full bg-white">
-        <ScreenHeader title="Tanker Requested" onMenu={onMenu} />
+        <ScreenHeader title={t.tanker.requestedTitle} onMenu={onMenu} />
         <div className="flex-1 overflow-y-auto px-6 py-6 fade-in text-center flex flex-col items-center">
           <div className="w-20 h-20 rounded-full bg-[#b7f0cd] flex items-center justify-center mb-4">
             <Icon
@@ -25,40 +27,39 @@ export default function TankerRequestPage() {
             />
           </div>
           <div className="text-xl font-bold text-[#002045] mb-2">
-            Request Submitted
+            {t.tanker.successTitle}
           </div>
           <div className="text-[#8a909c] text-sm leading-relaxed mb-6">
-            Your request for a water tanker (Req ID: TNK-2026-892) has been
-            received.
+            {t.tanker.successBody.replace("{id}", "TNK-2026-892")}
           </div>
 
           <div className="card-filled w-full p-5 text-left mb-6">
             <div className="text-sm font-bold text-[#002045] mb-4">
-              Status Tracking
+              {t.tanker.tracking}
             </div>
             <div className="space-y-0">
               {[
                 {
-                  label: "Requested",
-                  date: "Just now",
+                  label: t.tanker.steps.requested,
+                  date: t.tanker.justNow,
                   done: true,
                   icon: "send",
                 },
                 {
-                  label: "Approved",
-                  date: "Pending",
+                  label: t.tanker.steps.approved,
+                  date: t.tanker.pending,
                   done: false,
                   icon: "thumb_up",
                 },
                 {
-                  label: "Dispatched",
-                  date: "Pending",
+                  label: t.tanker.steps.dispatched,
+                  date: t.tanker.pending,
                   done: false,
                   icon: "local_shipping",
                 },
                 {
-                  label: "Delivered",
-                  date: "Pending",
+                  label: t.tanker.steps.delivered,
+                  date: t.tanker.pending,
                   done: false,
                   icon: "done_all",
                 },
@@ -100,11 +101,8 @@ export default function TankerRequestPage() {
             </div>
           </div>
 
-          <button
-            className="btn-primary w-full"
-            onClick={() => onNavigate("home")}
-          >
-            Return to Home
+          <button className="btn-primary" onClick={() => onNavigate("home")}>
+            {t.tanker.returnHome}
           </button>
         </div>
       </div>
@@ -115,7 +113,7 @@ export default function TankerRequestPage() {
     <div className="flex flex-col h-full bg-[#f8f9fb]">
       <div className="bg-white">
         <ScreenHeader
-          title="Request a Tanker"
+          title={t.tanker.formTitle}
           onBack={() => onNavigate("services")}
           onMenu={onMenu}
         />
@@ -123,7 +121,7 @@ export default function TankerRequestPage() {
       <div className="flex-1 overflow-y-auto pb-32 px-4 pt-4 space-y-4 fade-in">
         <div className="card-elevated p-4 bg-gray-50">
           <div className="text-xs font-bold text-[#8a909c] uppercase mb-2">
-            Delivery Details (Auto-filled)
+            {t.tanker.delivery}
           </div>
           <div className="text-sm font-semibold text-[#002045]">
             Ward 12 — Rankala
@@ -135,7 +133,7 @@ export default function TankerRequestPage() {
 
         <div className="card-elevated p-4">
           <div className="text-sm font-bold text-[#002045] mb-3">
-            Urgency Level
+            {t.tanker.urgency}
           </div>
           <div className="flex gap-2">
             <button
@@ -148,7 +146,7 @@ export default function TankerRequestPage() {
                 cursor: "pointer",
               }}
             >
-              Normal
+              {t.tanker.normal}
             </button>
             <button
               onClick={() => setUrgency("Urgent")}
@@ -160,14 +158,14 @@ export default function TankerRequestPage() {
                 cursor: "pointer",
               }}
             >
-              Urgent
+              {t.tanker.urgent}
             </button>
           </div>
         </div>
 
         <div className="card-elevated p-4">
           <div className="text-sm font-bold text-[#002045] mb-3">
-            Preferred Time Slot
+            {t.tanker.slot}
           </div>
           <select
             className="input-field w-full"
@@ -175,28 +173,28 @@ export default function TankerRequestPage() {
             onChange={(e) => setSlot(e.target.value)}
           >
             <option value="" disabled>
-              Select a time slot
+              {t.tanker.slotPlaceholder}
             </option>
-            <option value="morning">Morning (8 AM - 12 PM)</option>
-            <option value="afternoon">Afternoon (12 PM - 4 PM)</option>
-            <option value="evening">Evening (4 PM - 8 PM)</option>
+            <option value="morning">{t.tanker.slots.morning}</option>
+            <option value="afternoon">{t.tanker.slots.afternoon}</option>
+            <option value="evening">{t.tanker.slots.evening}</option>
           </select>
         </div>
 
         <div className="card-elevated p-4">
           <div className="text-sm font-bold text-[#002045] mb-3">
-            Additional Notes (Optional)
+            {t.tanker.notes}
           </div>
           <textarea
             className="input-field w-full resize-none"
             rows={3}
-            placeholder="E.g., Park near the community hall..."
+            placeholder={t.tanker.notesPlaceholder}
           />
         </div>
       </div>
 
       <div
-        className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-4 bg-white border-t border-gray-100 z-10"
+        className="fixed bottom-16 left-0 right-0 px-4 pb-3 pt-2 bg-white border-t border-gray-100 z-10 safe-area-bottom"
         style={{
           maxWidth: 430,
           margin: "0 auto",
@@ -205,12 +203,11 @@ export default function TankerRequestPage() {
         }}
       >
         <button
-          className="btn-primary w-full"
+          className="btn-primary"
           onClick={() => setSubmitted(true)}
           disabled={!slot}
-          style={{ opacity: slot ? 1 : 0.5 }}
         >
-          Submit Request
+          {t.tanker.submit}
         </button>
       </div>
     </div>
