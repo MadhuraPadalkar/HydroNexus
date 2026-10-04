@@ -15,11 +15,13 @@ import {
   type WaterConnectionApplication,
   type ServiceRequest,
 } from "@/services/api"
+import { useLanguage } from "@/i18n/LanguageContext"
 
 export function useCitizenComplaints() {
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useLanguage()
 
   const fetchComplaints = useCallback(async () => {
     setLoading(true)
@@ -29,12 +31,12 @@ export function useCitizenComplaints() {
       setComplaints(res.data)
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Failed to fetch complaints",
+        err instanceof Error ? err.message : t.errors.complaints,
       )
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchComplaints()
@@ -58,6 +60,7 @@ export function useCitizenSupply() {
   const [outages, setOutages] = useState<Outage[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useLanguage()
 
   const fetchSupply = useCallback(async () => {
     setLoading(true)
@@ -71,12 +74,12 @@ export function useCitizenSupply() {
       setOutages(oRes.data)
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Failed to fetch supply status",
+        err instanceof Error ? err.message : t.errors.supply,
       )
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchSupply()
@@ -89,6 +92,7 @@ export function useCitizenBills() {
   const [bills, setBills] = useState<Bill[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useLanguage()
 
   const fetchBills = useCallback(async () => {
     setLoading(true)
@@ -97,11 +101,11 @@ export function useCitizenBills() {
       const res = await billingApi.getBills()
       setBills(res.data)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to fetch bills")
+      setError(err instanceof Error ? err.message : t.errors.bills)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchBills()
@@ -118,6 +122,7 @@ export function useCitizenAlerts() {
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useLanguage()
 
   const fetchAlerts = useCallback(async () => {
     setLoading(true)
@@ -126,11 +131,11 @@ export function useCitizenAlerts() {
       const res = await alertsApi.getAlerts()
       setAlerts(res.data)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to fetch alerts")
+      setError(err instanceof Error ? err.message : t.errors.alerts)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchAlerts()
@@ -143,6 +148,7 @@ export function useCitizenNotices() {
   const [notices, setNotices] = useState<Notice[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useLanguage()
 
   const fetchNotices = useCallback(async () => {
     setLoading(true)
@@ -151,11 +157,11 @@ export function useCitizenNotices() {
       const res = await alertsApi.getNotices()
       setNotices(res.data)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to fetch notices")
+      setError(err instanceof Error ? err.message : t.errors.notices)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchNotices()
@@ -168,6 +174,7 @@ export function useCitizenUsage() {
   const [usage, setUsage] = useState<UsageDataPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useLanguage()
 
   const fetchUsage = useCallback(async () => {
     setLoading(true)
@@ -176,11 +183,11 @@ export function useCitizenUsage() {
       const res = await billingApi.getUsage()
       setUsage(res.data)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to fetch usage")
+      setError(err instanceof Error ? err.message : t.errors.usage)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchUsage()
@@ -193,6 +200,7 @@ export function useComplaintDetail(id: string | undefined) {
   const [complaint, setComplaint] = useState<Complaint | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useLanguage()
 
   const fetchDetail = useCallback(async () => {
     if (!id) {
@@ -206,12 +214,12 @@ export function useComplaintDetail(id: string | undefined) {
       setComplaint(res.data)
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Failed to fetch complaint",
+        err instanceof Error ? err.message : t.errors.complaint,
       )
     } finally {
       setLoading(false)
     }
-  }, [id])
+  }, [id, t])
 
   useEffect(() => {
     fetchDetail()
@@ -226,6 +234,7 @@ export function useCitizenServices() {
   const [requests, setRequests] = useState<ServiceRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useLanguage()
 
   const fetchServices = useCallback(async () => {
     setLoading(true)
@@ -238,11 +247,11 @@ export function useCitizenServices() {
       setApplications(aRes.data)
       setRequests(rRes.data)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to fetch services")
+      setError(err instanceof Error ? err.message : t.errors.services)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchServices()

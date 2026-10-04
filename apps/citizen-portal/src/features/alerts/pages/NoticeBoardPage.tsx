@@ -2,10 +2,13 @@ import { useOutletContext } from "react-router-dom"
 import { Icon, ScreenHeader } from "@/components/CommonUI"
 import { useCitizenNotices } from "@/hooks/useCitizenData"
 import { LoadingSpinner, EmptyState, ErrorMessage } from "@water/ui"
+import { useLanguage } from "@/i18n/LanguageContext"
+import { localizeNoticeCat } from "@/i18n/translations"
 import type { CitizenOutletContext } from "@/app/layouts/CitizenLayout"
 
 export default function NoticeBoardPage() {
   const { onMenu } = useOutletContext<CitizenOutletContext>()
+  const { lang, t } = useLanguage()
   const { notices, loading, error, refetch } = useCitizenNotices()
   const catColors: Record<string, string> = {
     General: "bg-[#e8f1ff] text-[#0061a5]",
@@ -17,24 +20,24 @@ export default function NoticeBoardPage() {
   return (
     <div className="flex flex-col h-full bg-[#f8f9fb]">
       <div className="bg-white">
-        <ScreenHeader title="Community Notice Board" onMenu={onMenu} />
+        <ScreenHeader title={t.notices.title} onMenu={onMenu} />
         <div className="px-4 pb-3 text-xs text-[#8a909c]">
-          Ward 12 — Rankala · Official Announcements
+          {t.notices.subtitle}
         </div>
       </div>
       <div className="flex-1 overflow-y-auto pb-24 px-4 pt-4 space-y-3 fade-in">
-        {loading && <LoadingSpinner message="Fetching notices..." />}
+        {loading && <LoadingSpinner message={t.notices.loading} />}
         {error && (
           <ErrorMessage
-            title="Could not load notices"
+            title={t.notices.loadFailed}
             message={error}
             onRetry={refetch}
           />
         )}
         {!loading && !error && notices.length === 0 && (
           <EmptyState
-            title="No notices yet"
-            description="There are no official announcements at the moment."
+            title={t.notices.emptyTitle}
+            description={t.notices.emptyBody}
             icon="campaign"
           />
         )}
@@ -46,7 +49,7 @@ export default function NoticeBoardPage() {
                 <span
                   className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${catColors[n.category] || "bg-gray-100 text-gray-600"}`}
                 >
-                  {n.category}
+                  {localizeNoticeCat(n.category, lang)}
                 </span>
                 <span className="text-xs text-[#8a909c] flex-shrink-0">
                   {n.date}
@@ -63,7 +66,7 @@ export default function NoticeBoardPage() {
                   <Icon name="business" size={12} className="text-white" />
                 </div>
                 <span className="text-[10px] text-[#8a909c] font-medium">
-                  Kolhapur Municipal Corporation
+                  {t.notices.footer}
                 </span>
               </div>
             </div>

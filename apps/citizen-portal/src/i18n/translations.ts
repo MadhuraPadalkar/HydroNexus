@@ -273,6 +273,136 @@ const en = {
     paidSep: "Paid ·",
     due: "Due",
   },
+  supply: {
+    title: "Water Supply Status",
+    loading: "Fetching supply status...",
+    loadFailed: "Could not load supply status",
+    emptyTitle: "No supply schedule",
+    emptyBody: "Supply schedule information is not available right now.",
+    on: "Supply is ON",
+    off: "Supply Disrupted",
+    fallbackZone: "Ward 12 — Rankala",
+    zoneSuffix: "Zone",
+    schedule: "Supply Schedule",
+    pressure: "Pressure",
+    status: {
+      onTime: "On Time",
+      delayed: "Delayed",
+      disrupted: "Disrupted",
+    },
+    shortage: "Water Shortage Information",
+    outage: "Outage",
+    planned: "Planned work",
+    started: "Started",
+    restoration: "Expected restoration:",
+    tankers: "tanker(s) dispatched.",
+  },
+  services: {
+    title: "Water Services",
+    items: {
+      connection: {
+        label: "Water Connection",
+        desc: "View or manage your account details",
+      },
+      meter: {
+        label: "Water Meter Services",
+        desc: "Report meter issues or request replacement",
+      },
+      tanker: {
+        label: "Request a Tanker",
+        desc: "Book an emergency water tanker",
+      },
+      other: {
+        label: "Other Service Requests",
+        desc: "General requests and queries",
+      },
+    },
+  },
+  tanker: {
+    requestedTitle: "Tanker Requested",
+    successTitle: "Request Submitted",
+    successBody: "Your request for a water tanker (Req ID: {id}) has been received.",
+    tracking: "Status Tracking",
+    steps: {
+      requested: "Requested",
+      approved: "Approved",
+      dispatched: "Dispatched",
+      delivered: "Delivered",
+    },
+    justNow: "Just now",
+    pending: "Pending",
+    returnHome: "Return to Home",
+    formTitle: "Request a Tanker",
+    delivery: "Delivery Details (Auto-filled)",
+    urgency: "Urgency Level",
+    normal: "Normal",
+    urgent: "Urgent",
+    slot: "Preferred Time Slot",
+    slotPlaceholder: "Select a time slot",
+    slots: {
+      morning: "Morning (8 AM - 12 PM)",
+      afternoon: "Afternoon (12 PM - 4 PM)",
+      evening: "Evening (4 PM - 8 PM)",
+    },
+    notes: "Additional Notes (Optional)",
+    notesPlaceholder: "E.g., Park near the community hall...",
+    submit: "Submit Request",
+  },
+  conservation: {
+    title: "Water Conservation",
+    usageTitle: "Your Monthly Usage",
+    usageSub: "Compared to Ward 12 Average",
+    youUsage: "You: 3,200L",
+    efficient: "Efficient User!",
+    wardAvg: "Ward Avg: 4,000L",
+    tipsTitle: "Water Saving Tips",
+    tips: [
+      {
+        title: "Fix Leaks Promptly",
+        desc: "A dripping tap can waste up to 15 litres of water a day.",
+      },
+      {
+        title: "Turn Off the Tap",
+        desc: "Don't leave water running while brushing teeth or shaving.",
+      },
+      {
+        title: "Full Loads Only",
+        desc: "Run washing machines and dishwashers only with a full load.",
+      },
+      {
+        title: "Water Plants Wisely",
+        desc: "Water your garden early morning or late evening to reduce evaporation.",
+      },
+    ],
+  },
+  alerts: {
+    title: "Alerts & Notifications",
+    activeSingle: "{n} active emergency",
+    activeMany: "{n} active emergencies",
+    loading: "Fetching alerts...",
+    loadFailed: "Could not load alerts",
+    emptyTitle: "No alerts right now",
+    emptyBody: "There are no active alerts for your ward. Check back later.",
+  },
+  notices: {
+    title: "Community Notice Board",
+    subtitle: "Ward 12 — Rankala · Official Announcements",
+    loading: "Fetching notices...",
+    loadFailed: "Could not load notices",
+    emptyTitle: "No notices yet",
+    emptyBody: "There are no official announcements at the moment.",
+    footer: "Kolhapur Municipal Corporation",
+  },
+  errors: {
+    complaints: "Failed to fetch complaints",
+    complaint: "Failed to fetch complaint",
+    supply: "Failed to fetch supply status",
+    bills: "Failed to fetch bills",
+    alerts: "Failed to fetch alerts",
+    notices: "Failed to fetch notices",
+    usage: "Failed to fetch usage",
+    services: "Failed to fetch services",
+  },
 }
 
 export type AppStrings = typeof en
@@ -485,34 +615,6 @@ const mr: AppStrings = {
     emptyTitle: "या गटात तक्रारी नाहीत",
     emptyBody: "या स्थितीत तुमच्या कोणत्याही तक्रारी नाहीत.",
   },
-  detail: {
-    title: "तक्रार तपशील",
-    loading: "तक्रार तपशील लोड होत आहे...",
-    loadFailed: "तक्रार लोड करता आली नाही",
-    notFoundTitle: "तक्रार सापडली नाही",
-    notFoundBody: "ही तक्रार काढून टाकली असावी किंवा लिंक चुकीची आहे.",
-    steps: {
-      submitted: "नोंदवली",
-      assigned: "अधिकाऱ्याकडे सोपवली",
-      inProgress: "काम सुरू आहे",
-      resolved: "पूर्ण झाले",
-      reported: "नोंदवली",
-      assignedShort: "सोपवली",
-    },
-    today: "आज",
-    done: "पूर्ण",
-    assignedWord: "सोपवले",
-    photo: "जोडलेला फोटो",
-    timeline: "स्थिती टप्पे",
-    communication: "संवाद",
-    noMessages:
-      "अजून संदेश नाहीत. तक्रार सोपवल्यावर आमची टीम इथे उत्तर देईल.",
-    typeMessage: "संदेश लिहा...",
-    filedOn: "नोंदणी तारीख",
-    rateTitle: "निराकरणाला गुण द्या",
-    rateSub: "आमची सेवा सुधारण्यास मदत करा",
-    submitRating: "गुण पाठवा",
-  },
   billing: {
     title: "बिल व वापर",
     loading: "बिल तपशील लोड होत आहे...",
@@ -547,6 +649,164 @@ const mr: AppStrings = {
     paidSep: "भरले ·",
     due: "देय",
   },
+  detail: {
+    title: "तक्रार तपशील",
+    loading: "तक्रार तपशील लोड होत आहे...",
+    loadFailed: "तक्रार लोड करता आली नाही",
+    notFoundTitle: "तक्रार सापडली नाही",
+    notFoundBody: "ही तक्रार काढून टाकली असावी किंवा लिंक चुकीची आहे.",
+    steps: {
+      submitted: "नोंदवली",
+      assigned: "अधिकाऱ्याकडे सोपवली",
+      inProgress: "काम सुरू आहे",
+      resolved: "पूर्ण झाले",
+      reported: "नोंदवली",
+      assignedShort: "सोपवली",
+    },
+    today: "आज",
+    done: "पूर्ण",
+    assignedWord: "सोपवले",
+    photo: "जोडलेला फोटो",
+    timeline: "स्थिती टप्पे",
+    communication: "संवाद",
+    noMessages:
+      "अजून संदेश नाहीत. तक्रार सोपवल्यावर आमची टीम इथे उत्तर देईल.",
+    typeMessage: "संदेश लिहा...",
+    filedOn: "नोंदणी तारीख",
+    rateTitle: "निराकरणाला गुण द्या",
+    rateSub: "आमची सेवा सुधारण्यास मदत करा",
+    submitRating: "गुण पाठवा",
+  },
+  supply: {
+    title: "पुरवठा स्थिती",
+    loading: "पुरवठा स्थिती लोड होत आहे...",
+    loadFailed: "पुरवठा स्थिती लोड करता आली नाही",
+    emptyTitle: "पुरवठा वेळापत्रक नाही",
+    emptyBody: "सध्या पुरवठा वेळापत्रक उपलब्ध नाही.",
+    on: "पुरवठा सुरू आहे",
+    off: "पुरवठा खंडित",
+    fallbackZone: "प्रभाग १२ — रंकाळा",
+    zoneSuffix: "झोन",
+    schedule: "पुरवठा वेळापत्रक",
+    pressure: "दाब",
+    status: {
+      onTime: "वेळेवर",
+      delayed: "उशीर",
+      disrupted: "खंडित",
+    },
+    shortage: "पाणी टंचाई माहिती",
+    outage: "खंड",
+    planned: "नियोजित काम",
+    started: "सुरुवात",
+    restoration: "पुनर्स्थापना अपेक्षित:",
+    tankers: "टँकर पाठवले.",
+  },
+  services: {
+    title: "पाणी सेवा",
+    items: {
+      connection: {
+        label: "पाणी जोडणी",
+        desc: "तुमची खाते माहिती पाहा व व्यवस्थापित करा",
+      },
+      meter: {
+        label: "पाणी मीटर सेवा",
+        desc: "मीटर तक्रार नोंदवा किंवा बदलण्याची मागणी करा",
+      },
+      tanker: {
+        label: "टँकर मागवा",
+        desc: "आपत्कालीन पाणी टँकर बुक करा",
+      },
+      other: {
+        label: "इतर सेवा मागण्या",
+        desc: "सामान्य मागण्या व प्रश्न",
+      },
+    },
+  },
+  tanker: {
+    requestedTitle: "टँकर मागणी नोंदवली",
+    successTitle: "मागणी पाठवली",
+    successBody: "पाणी टँकरची तुमची मागणी (मागणी क्र.: {id}) मिळाली आहे.",
+    tracking: "स्थिती मागोवा",
+    steps: {
+      requested: "मागणी केली",
+      approved: "मंजूर",
+      dispatched: "पाठवले",
+      delivered: "पोचवले",
+    },
+    justNow: "आत्ताच",
+    pending: "बाकी",
+    returnHome: "मुख्य पडद्यावर",
+    formTitle: "टँकर मागवा",
+    delivery: "पोच पत्ता (आपोआप भरलेला)",
+    urgency: "तातडीची पातळी",
+    normal: "सामान्य",
+    urgent: "तातडीचे",
+    slot: "पसंतीची वेळ",
+    slotPlaceholder: "वेळ निवडा",
+    slots: {
+      morning: "सकाळ (८–१२)",
+      afternoon: "दुपार (१२–४)",
+      evening: "संध्याकाळ (४–८)",
+    },
+    notes: "अधिक माहिती (ऐच्छिक)",
+    notesPlaceholder: "उदा., समाज मंदिराजवळ थांबा...",
+    submit: "मागणी पाठवा",
+  },
+  conservation: {
+    title: "पाणी बचत",
+    usageTitle: "तुमचा मासिक वापर",
+    usageSub: "प्रभाग १२ सरासरीशी तुलना",
+    youUsage: "तुम्ही: ३,२०० लि.",
+    efficient: "उत्तम वापरकर्ता!",
+    wardAvg: "प्रभाग सरासरी: ४,००० लि.",
+    tipsTitle: "पाणी वाचवण्याच्या युक्त्या",
+    tips: [
+      {
+        title: "गळती लगेच दुरुस्त करा",
+        desc: "ठिबकणारा नळ दिवसाला १५ लिटर पाणी वाया घालवतो.",
+      },
+      {
+        title: "नळ बंद करा",
+        desc: "दात घासताना किंवा दाढी करताना पाणी वाहू देऊ नका.",
+      },
+      {
+        title: "पूर्ण भरल्यावरच धुवा",
+        desc: "वॉशिंग मशीन व डिशवॉशर पूर्ण भरल्यावरच चालवा.",
+      },
+      {
+        title: "झाडांना शहाणपणे पाणी द्या",
+        desc: "बाष्पीभवन कमी करण्यासाठी सकाळी लवकर किंवा संध्याकाळी उशिरा पाणी द्या.",
+      },
+    ],
+  },
+  alerts: {
+    title: "सूचना व संदेश",
+    activeSingle: "{n} सक्रिय आणीबाणी",
+    activeMany: "{n} सक्रिय आणीबाणी",
+    loading: "सूचना लोड होत आहेत...",
+    loadFailed: "सूचना लोड करता आल्या नाहीत",
+    emptyTitle: "सध्या सूचना नाहीत",
+    emptyBody: "तुमच्या प्रभागासाठी सक्रिय सूचना नाहीत. नंतर पुन्हा पाहा.",
+  },
+  notices: {
+    title: "समुदाय सूचना फलक",
+    subtitle: "प्रभाग १२ — रंकाळा · अधिकृत घोषणा",
+    loading: "सूचना लोड होत आहेत...",
+    loadFailed: "सूचना लोड करता आल्या नाहीत",
+    emptyTitle: "अजून सूचना नाहीत",
+    emptyBody: "सध्या अधिकृत घोषणा नाहीत.",
+    footer: "Kolhapur Municipal Corporation",
+  },
+  errors: {
+    complaints: "तक्रारी आणता आल्या नाहीत",
+    complaint: "तक्रार आणता आली नाही",
+    supply: "पुरवठा स्थिती आणता आली नाही",
+    bills: "बिले आणता आली नाहीत",
+    alerts: "सूचना आणता आल्या नाहीत",
+    notices: "फलक सूचना आणता आल्या नाहीत",
+    usage: "वापर आणता आला नाही",
+    services: "सेवा आणता आल्या नाहीत",
+  },
 }
 
 export const translations: Record<Lang, AppStrings> = { en, mr }
@@ -564,4 +824,38 @@ const STATUS_KEYS: Record<string, keyof AppStrings["status"]> = {
 export function localizeStatus(status: string, t: AppStrings): string {
   const key = STATUS_KEYS[status]
   return key ? t.status[key] : status
+}
+
+const SUPPLY_STATUS_KEYS: Record<string, keyof AppStrings["supply"]["status"]> =
+  {
+    "On Time": "onTime",
+    Delayed: "delayed",
+    Disrupted: "disrupted",
+  }
+
+/** Map an English supply-schedule status to the current language. */
+export function localizeSupplyStatus(status: string, t: AppStrings): string {
+  const key = SUPPLY_STATUS_KEYS[status]
+  return key ? t.supply.status[key] : status
+}
+
+const NOTICE_CAT_KEYS: Record<string, string> = {
+  General: "general",
+  Tariff: "tariff",
+  Maintenance: "maintenance",
+  Emergency: "emergency",
+}
+
+const NOTICE_CAT_MR: Record<string, string> = {
+  general: "सामान्य",
+  tariff: "दर",
+  maintenance: "दुरुस्ती",
+  emergency: "आणीबाणी",
+}
+
+/** Map an English notice category to the current language. */
+export function localizeNoticeCat(category: string, lang: Lang): string {
+  if (lang !== "mr") return category
+  const key = NOTICE_CAT_KEYS[category]
+  return key && NOTICE_CAT_MR[key] ? NOTICE_CAT_MR[key]! : category
 }
