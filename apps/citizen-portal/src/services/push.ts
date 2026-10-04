@@ -18,13 +18,13 @@ export async function initPushNotifications(): Promise<void> {
   initialized = true
 
   if (import.meta.env.VITE_ENABLE_PUSH !== "true") {
-    console.log("[push] push notifications disabled (VITE_ENABLE_PUSH!=true)")
+    console.info("[push] push notifications disabled (VITE_ENABLE_PUSH!=true)")
     return
   }
 
   try {
     if (!Capacitor.isNativePlatform()) {
-      console.log("[push] push notifications skipped (not a native platform)")
+      console.info("[push] push notifications skipped (not a native platform)")
       return
     }
 
@@ -50,7 +50,7 @@ export async function initPushNotifications(): Promise<void> {
     }
 
     await PushNotifications.addListener("registration", (token) => {
-      console.log("[push] registration token:", token.value)
+      console.info("[push] registration token:", token.value)
     })
     await PushNotifications.addListener("registrationError", (err) => {
       console.warn("[push] registration error:", err.error)
@@ -58,13 +58,13 @@ export async function initPushNotifications(): Promise<void> {
     await PushNotifications.addListener(
       "pushNotificationReceived",
       (notification) => {
-        console.log("[push] notification received:", notification)
+        console.info("[push] notification received:", notification)
       },
     )
     await PushNotifications.addListener(
       "pushNotificationActionPerformed",
       (action) => {
-        console.log("[push] notification action:", action)
+        console.info("[push] notification action:", action)
       },
     )
   } catch (err) {

@@ -7,7 +7,10 @@ import { Icon, ScreenHeader } from "@/components/CommonUI"
 import { explainDenial, explainWhy } from "@/services/permissions"
 import { useLanguage } from "@/i18n/LanguageContext"
 import type { CitizenOutletContext } from "@/app/layouts/CitizenLayout"
-
+type Coordinates = {
+  lat: number
+  lng: number
+}
 export default function ReportIssuePage() {
   const navigate = useNavigate()
   const { onMenu } = useOutletContext<CitizenOutletContext>()
@@ -17,7 +20,7 @@ export default function ReportIssuePage() {
   const [desc, setDesc] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [photo, setPhoto] = useState<string | null>(null)
-  const [coords, setCoords] = useState<{ lat: number lng: number } | null>(null)
+  const [coords, setCoords] = useState<Coordinates | null>(null)
   const [photoBusy, setPhotoBusy] = useState(false)
   const [locBusy, setLocBusy] = useState(false)
   const [notice, setNotice] = useState("")
