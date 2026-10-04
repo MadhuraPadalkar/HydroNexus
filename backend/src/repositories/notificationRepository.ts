@@ -1,5 +1,5 @@
-import type { Alert, Notice } from "../../../packages/types/src/index";
-import { db } from "./store";
+import type { Alert, Notice } from "../../../packages/types/src/index"
+import { db } from "./store"
 
 /**
  * Read-side repository for citizens. Composing/sending broadcasts is
@@ -8,21 +8,26 @@ import { db } from "./store";
  */
 export const notificationRepository = {
   alertsForWard(ward?: string): Alert[] {
-    if (!ward) return [...db.alerts];
-    const w = ward.toLowerCase();
-    const wardNum = (ward.match(/\d+/) || [])[0];
+    if (!ward) return [...db.alerts]
+    const w = ward.toLowerCase()
+    const wardNum = (ward.match(/\d+/) || [])[0]
     return db.alerts.filter((a) => {
-      const targets = a.targetWards || [];
-      if (targets.some((t) => t.toLowerCase() === "all wards")) return true;
+      const targets = a.targetWards || []
+      if (targets.some((t) => t.toLowerCase() === "all wards")) return true
       return targets.some((t) => {
-        const tl = t.toLowerCase();
-        if (tl === w) return true;
-        if (wardNum && tl.includes(`ward ${wardNum}`)) return true;
-        return w.includes(tl) || tl.includes(w);
-      });
-    });
+        const tl = t.toLowerCase()
+        if (tl === w) return true
+        if (wardNum && tl.includes(`ward ${wardNum}`)) return true
+        return w.includes(tl) || tl.includes(w)
+      })
+    })
   },
-  createAlert(input: { title: string; body: string; severity: Alert["severity"]; targetWards?: string[] }): Alert {
+  createAlert(input: {
+    title: string
+    body: string
+    severity: Alert["severity"]
+    targetWards?: string[]
+  }): Alert {
     const alert: Alert = {
       id: String(Date.now()),
       severity: input.severity,
@@ -31,24 +36,24 @@ export const notificationRepository = {
       body: input.body,
       time: "Just now",
       targetWards: input.targetWards,
-    };
-    db.alerts.unshift(alert);
-    return alert;
+    }
+    db.alerts.unshift(alert)
+    return alert
   },
   markRead(citizenId: string, alertId: string | number): void {
-    const key = String(alertId);
-    const existing = db.alertReads[citizenId] || [];
+    const key = String(alertId)
+    const existing = db.alertReads[citizenId] || []
     if (!existing.map(String).includes(key)) {
-      db.alertReads[citizenId] = [...existing, alertId];
+      db.alertReads[citizenId] = [...existing, alertId]
     }
   },
   readIds(citizenId: string): string[] {
-    return (db.alertReads[citizenId] || []).map(String);
+    return (db.alertReads[citizenId] || []).map(String)
   },
   notices(): Notice[] {
-    return [...db.notices];
+    return [...db.notices]
   },
   wardAverage(ward: string) {
-    return db.wardAverages.find((w) => w.ward === ward);
+    return db.wardAverages.find((w) => w.ward === ward)
   },
-};
+}

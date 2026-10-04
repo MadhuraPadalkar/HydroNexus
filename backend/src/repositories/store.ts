@@ -7,7 +7,7 @@ import type {
   ServiceRequest,
   UsageDataPoint,
   WaterConnectionApplication,
-} from "../../../packages/types/src/index";
+} from "../../../packages/types/src/index"
 
 /**
  * TEMPORARY in-memory data store.
@@ -17,41 +17,41 @@ import type {
  */
 
 export interface OtpEntry {
-  phone: string;
-  otp: string;
-  expiresAt: number;
-  attempts: number;
+  phone: string
+  otp: string
+  expiresAt: number
+  attempts: number
 }
 
 export interface RefreshTokenEntry {
-  token: string;
-  citizenId: string;
-  expiresAt: number;
+  token: string
+  citizenId: string
+  expiresAt: number
 }
 
 export interface WardConservationStat {
-  ward: string;
-  averageUsageKL: number;
-  period: string;
-  sampleSize: number;
+  ward: string
+  averageUsageKL: number
+  period: string
+  sampleSize: number
 }
 
 export interface DbShape {
-  citizens: CitizenRecord[];
-  complaints: Complaint[];
-  bills: Bill[];
-  usageByConsumer: Record<string, UsageDataPoint[]>;
-  serviceRequests: ServiceRequest[];
-  connectionApplications: WaterConnectionApplication[];
-  alerts: Alert[];
-  notices: Notice[];
+  citizens: CitizenRecord[]
+  complaints: Complaint[]
+  bills: Bill[]
+  usageByConsumer: Record<string, UsageDataPoint[]>
+  serviceRequests: ServiceRequest[]
+  connectionApplications: WaterConnectionApplication[]
+  alerts: Alert[]
+  notices: Notice[]
   /** citizenId -> set of alert ids marked read */
-  alertReads: Record<string, Array<string | number>>;
-  otps: Map<string, OtpEntry>;
-  refreshTokens: Map<string, RefreshTokenEntry>;
-  wardAverages: WardConservationStat[];
-  complaintSeq: number;
-  serviceSeq: number;
+  alertReads: Record<string, Array<string | number>>
+  otps: Map<string, OtpEntry>
+  refreshTokens: Map<string, RefreshTokenEntry>
+  wardAverages: WardConservationStat[]
+  complaintSeq: number
+  serviceSeq: number
 }
 
 function seed(): DbShape {
@@ -102,9 +102,21 @@ function seed(): DbShape {
         updated: "11 Sep, 09:00",
         icon: "water_damage",
         timeline: [
-          { status: "Open", time: "11 Sep, 07:40", note: "Complaint logged via Citizen Portal" },
-          { status: "Assigned", time: "11 Sep, 08:10", note: "Assigned to Anil Jadhav" },
-          { status: "In Progress", time: "11 Sep, 09:00", note: "Field team dispatched" },
+          {
+            status: "Open",
+            time: "11 Sep, 07:40",
+            note: "Complaint logged via Citizen Portal",
+          },
+          {
+            status: "Assigned",
+            time: "11 Sep, 08:10",
+            note: "Assigned to Anil Jadhav",
+          },
+          {
+            status: "In Progress",
+            time: "11 Sep, 09:00",
+            note: "Field team dispatched",
+          },
         ],
       },
       {
@@ -122,7 +134,13 @@ function seed(): DbShape {
         description: "Brown muddy water from tap for past 2 days.",
         updated: "10 Sep, 18:20",
         icon: "science",
-        timeline: [{ status: "Open", time: "10 Sep, 18:20", note: "Complaint logged via Citizen Portal" }],
+        timeline: [
+          {
+            status: "Open",
+            time: "10 Sep, 18:20",
+            note: "Complaint logged via Citizen Portal",
+          },
+        ],
       },
     ],
     bills: [
@@ -253,7 +271,8 @@ function seed(): DbShape {
         title: "Revised Water Tariff from October 2026",
         category: "Tariff",
         date: "1 Sep 2026",
-        content: "Revised slab schedule effective October 1. Up to 8,000 L/month stays subsidised.",
+        content:
+          "Revised slab schedule effective October 1. Up to 8,000 L/month stays subsidised.",
         priority: "High",
       },
     ],
@@ -261,13 +280,23 @@ function seed(): DbShape {
     otps: new Map<string, OtpEntry>(),
     refreshTokens: new Map<string, RefreshTokenEntry>(),
     wardAverages: [
-      { ward: "Ward 12 - Rankala", averageUsageKL: 13.9, period: "September 2026", sampleSize: 4120 },
-      { ward: "Ward 04 - Rajarampuri", averageUsageKL: 18.4, period: "September 2026", sampleSize: 5210 },
+      {
+        ward: "Ward 12 - Rankala",
+        averageUsageKL: 13.9,
+        period: "September 2026",
+        sampleSize: 4120,
+      },
+      {
+        ward: "Ward 04 - Rajarampuri",
+        averageUsageKL: 18.4,
+        period: "September 2026",
+        sampleSize: 5210,
+      },
     ],
     complaintSeq: 892,
     serviceSeq: 883,
-  };
+  }
 }
 
 /** Singleton store shared by all repositories (both citizen + officer routes). */
-export const db: DbShape = seed();
+export const db: DbShape = seed()

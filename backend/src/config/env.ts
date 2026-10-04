@@ -1,14 +1,14 @@
-import dotenv from "dotenv";
+import dotenv from "dotenv"
 
-dotenv.config();
+dotenv.config()
 
 function required(name: string, fallback: string): string {
-  const value = process.env[name];
-  if (value && value.length > 0) return value;
+  const value = process.env[name]
+  if (value && value.length > 0) return value
   if (process.env["NODE_ENV"] === "production" && !fallback) {
-    throw new Error(`Missing required env var ${name}`);
+    throw new Error(`Missing required env var ${name}`)
   }
-  return fallback;
+  return fallback
 }
 
 export const env = {
@@ -20,11 +20,12 @@ export const env = {
   ),
   jwtExpiresIn: process.env["JWT_EXPIRES_IN"] || "7d",
   refreshExpiresIn: process.env["JWT_REFRESH_EXPIRES_IN"] || "30d",
-  corsOrigins: (process.env["CORS_ORIGINS"] ||
+  corsOrigins: (
+    process.env["CORS_ORIGINS"] ||
     "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174"
   )
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean),
   isDev: (process.env["NODE_ENV"] || "development") !== "production",
-};
+}
