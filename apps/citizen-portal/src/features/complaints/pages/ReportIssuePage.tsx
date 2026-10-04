@@ -5,11 +5,13 @@ import { Geolocation } from "@capacitor/geolocation"
 import { Capacitor } from "@capacitor/core"
 import { Icon, ScreenHeader } from "@/components/CommonUI"
 import { explainDenial, explainWhy } from "@/services/permissions"
+import { useLanguage } from "@/i18n/LanguageContext"
 import type { CitizenOutletContext } from "@/app/layouts/CitizenLayout"
 
 export default function ReportIssuePage() {
   const navigate = useNavigate()
   const { onMenu } = useOutletContext<CitizenOutletContext>()
+  const { t } = useLanguage()
   const onNavigate = (s: string) => navigate("/" + (s === "home" ? "" : s))
   const [issueType, setIssueType] = useState("")
   const [desc, setDesc] = useState("")
@@ -26,7 +28,7 @@ export default function ReportIssuePage() {
     setNotice("")
     if (!explainWhy("camera")) {
       explainDenial("camera")
-      setNotice("Photo skipped — you can still submit without one.")
+      setNotice(t.report.photoSkipped)
       return
     }
     setPhotoBusy(true)
@@ -37,7 +39,7 @@ export default function ReportIssuePage() {
           const req = await Camera.requestPermissions()
           if (req.camera !== "granted" && req.photos !== "granted") {
             explainDenial("camera")
-            setNotice("Camera access was denied — continuing without a photo.")
+            setNotice(t.report.photoDenied)
             return
           }
         }
@@ -50,9 +52,7 @@ export default function ReportIssuePage() {
       })
       if (result.dataUrl) setPhoto(result.dataUrl)
     } catch {
-      setNotice(
-        "Couldn't access the camera right now — you can still submit without a photo.",
-      )
+      setNotice(t.report.photoFailed)
     } finally {
       setPhotoBusy(false)
     }
@@ -62,7 +62,7 @@ export default function ReportIssuePage() {
     setNotice("")
     if (!explainWhy("location")) {
       explainDenial("location")
-      setNotice("Location skipped — you can still submit without it.")
+      setNotice(t.report.locSkipped)
       return
     }
     setLocBusy(true)
@@ -73,7 +73,7 @@ export default function ReportIssuePage() {
           const req = await Geolocation.requestPermissions()
           if (req.location !== "granted") {
             explainDenial("location")
-            setNotice("Location access was denied — continuing without it.")
+            setNotice(t.report.locDenied)
             return
           }
         }
@@ -84,27 +84,25 @@ export default function ReportIssuePage() {
       })
       setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude })
     } catch {
-      setNotice(
-        "Couldn't get your location right now — you can still submit without it.",
-      )
+      setNotice(t.report.locFailed)
     } finally {
       setLocBusy(false)
     }
   }
 
   const issueTypes = [
-    { id: "leak", label: "Pipe Leak", icon: "plumbing" },
-    { id: "pressure", label: "Low Pressure", icon: "compress" },
-    { id: "no-supply", label: "No Supply", icon: "do_not_disturb" },
-    { id: "quality", label: "Water Quality", icon: "science" },
-    { id: "billing", label: "Billing Issue", icon: "receipt_long" },
-    { id: "other", label: "Other", icon: "more_horiz" },
+    { id: "leak", label: t.report.types.leak, icon: "plumbing" },
+    { id: "pressure", label: t.report.types.pressure, icon: "compress" },
+    { id: "no-supply", label: t.report.types.noSupply, icon: "do_not_disturb" },
+    { id: "quality", label: t.report.types.quality, icon: "science" },
+    { id: "billing", label: t.report.types.billing, icon: "receipt_long" },
+    { id: "other", label: t.report.types.other, icon: "more_horiz" },
   ]
 
   if (submitted) {
     return (
       <div className="flex flex-col h-full bg-white">
-        <ScreenHeader title="Complaint Submitted" onMenu={onMenu} />
+        <ScreenHeader title={t.report.submittedTitle} onMenu={onMenu} />
         <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-5 fade-in">
           <div className="w-24 h-24 rounded-full bg-[#b7f0cd] flex items-center justify-center">
             <Icon
@@ -116,33 +114,32 @@ export default function ReportIssuePage() {
           </div>
           <div>
             <div className="text-2xl font-bold text-[#002045] mb-2">
-              Complaint Registered!
+              {t.report.successTitle}
             </div>
             <div className="text-[#8a909c] text-sm leading-relaxed">
-              Your complaint has been submitted successfully. You will receive
-              updates via SMS and in-app notifications.
+              {t.report.successBody}
             </div>
           </div>
           <div className="card-filled w-full p-4 text-left">
-            <div className="text-xs text-[#8a909c] mb-1">Complaint ID</div>
+            <div className="text-xs text-[#8a909c] mb-1">{t.report.complaintId}</div>
             <div className="text-lg font-bold text-[#002045]">
               KMC-2026-3901
             </div>
             <div className="text-xs text-[#8a909c] mt-2">
-              Expected resolution: 3–5 working days
+              {t.report.expectedResolution}
             </div>
           </div>
           <button
             className="btn-primary"
             onClick={() => setSubmitted(false)}
           >
-            Back to Home
+            {t.report.backHome}
           </button>
           <button
             className="btn-secondary w-full"
             onClick={() => onNavigate("complaints")}
           >
-            Track My Complaints
+            {t.report.trackComplaints}
           </button>
         </div>
       </div>
@@ -152,13 +149,13 @@ export default function ReportIssuePage() {
   return (
     <div className="flex flex-col h-full bg-[#f8f9fb]">
       <div className="bg-white">
-        <ScreenHeader title="Report an Issue" onMenu={onMenu} />
+        <ScreenHeader title={t.report.title} onMenu={onMenu} />
       </div>
       <div className="flex-1 overflow-y-auto pb-32 px-4 pt-4 space-y-4">
         {/* Issue Type */}
         <div className="card-elevated p-4">
           <div className="text-sm font-bold text-[#002045] mb-3">
-            Issue Type *
+            {t.report.issueType}
           </div>
           <div className="grid grid-cols-3 gap-2">
             {issueTypes.map((t) => (
@@ -194,7 +191,7 @@ export default function ReportIssuePage() {
         {/* Photo Upload */}
         <div className="card-elevated p-4">
           <div className="text-sm font-bold text-[#002045] mb-3">
-            Add Photo (Optional)
+            {t.report.addPhoto}
           </div>
           <div className="flex gap-3">
             <button
@@ -204,7 +201,7 @@ export default function ReportIssuePage() {
             >
               <Icon name="camera_alt" size={28} className="text-[#8a909c]" />
               <span className="text-[10px] text-[#8a909c]">
-                {photoBusy ? "Opening…" : "Take photo"}
+                {photoBusy ? t.report.opening : t.report.takePhoto}
               </span>
             </button>
             <button
@@ -214,29 +211,29 @@ export default function ReportIssuePage() {
             >
               <Icon name="photo_library" size={28} className="text-[#8a909c]" />
               <span className="text-[10px] text-[#8a909c]">
-                Choose from gallery
+                {t.report.chooseGallery}
               </span>
             </button>
             {photo && (
               <img
                 src={photo}
-                alt="Issue attachment preview"
+                alt={t.report.photoPreviewAlt}
                 className="w-24 h-24 rounded-2xl object-cover"
               />
             )}
           </div>
           <div className="text-xs text-[#8a909c] mt-2">
-            Attach up to 3 photos (max 5MB each)
+            {t.report.photoHint}
           </div>
         </div>
 
         {/* GPS Location */}
         <div className="card-elevated p-4">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-bold text-[#002045]">Location</div>
+            <div className="text-sm font-bold text-[#002045]">{t.report.location}</div>
             <div className="flex items-center gap-1.5 text-xs text-[#1a6936]">
               <Icon name="my_location" size={14} className="text-[#1a6936]" />
-              GPS Detected
+              {t.report.gpsDetected}
             </div>
           </div>
           {/* Map Preview */}
@@ -288,13 +285,13 @@ export default function ReportIssuePage() {
             <span className="text-xs text-[#4a5060] flex-1">
               {coords
                 ? `Lat ${coords.lat.toFixed(6)}, Lng ${coords.lng.toFixed(6)}`
-                : "Rankala Lake Road, Ward 12, Kolhapur — 416002"}
+                : t.report.defaultAddress}
             </span>
             <button
               className="text-xs font-semibold text-[#0061a5]"
               style={{ background: "none", border: "none", cursor: "pointer" }}
             >
-              Edit
+              {t.report.edit}
             </button>
           </div>
           <button
@@ -305,10 +302,10 @@ export default function ReportIssuePage() {
             <span className="flex items-center justify-center gap-2">
               <Icon name="my_location" size={18} />
               {locBusy
-                ? "Getting location…"
+                ? t.report.gettingLocation
                 : coords
-                  ? "Update my location"
-                  : "Use my location"}
+                  ? t.report.updateLocation
+                  : t.report.useLocation}
             </span>
           </button>
           {notice && (
@@ -319,12 +316,12 @@ export default function ReportIssuePage() {
         {/* Description */}
         <div className="card-elevated p-4">
           <div className="text-sm font-bold text-[#002045] mb-3">
-            Description *
+            {t.report.description}
           </div>
           <textarea
             className="input-field resize-none"
             rows={4}
-            placeholder="Describe the issue in detail — when it started, how severe it is, and any other relevant information..."
+            placeholder={t.report.descPlaceholder}
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
           />
@@ -351,7 +348,7 @@ export default function ReportIssuePage() {
         >
           <span className="flex items-center justify-center gap-2">
             <Icon name="send" size={18} className="text-white" />
-            Submit Complaint
+            {t.report.submit}
           </span>
         </button>
       </div>

@@ -3,12 +3,15 @@ import { useOutletContext } from "react-router-dom"
 import { Icon, ScreenHeader } from "@/components/CommonUI"
 import { useCitizenBills, useCitizenUsage } from "@/hooks/useCitizenData"
 import { LoadingSpinner, EmptyState, ErrorMessage } from "@water/ui"
+import { useLanguage } from "@/i18n/LanguageContext"
+import { localizeStatus } from "@/i18n/translations"
 import type { CitizenOutletContext } from "@/app/layouts/CitizenLayout"
 
 const QUOTA_L = 8000
 
 export default function BillingPage() {
   const { onMenu } = useOutletContext<CitizenOutletContext>()
+  const { t } = useLanguage()
   const {
     bills,
     loading: billsLoading,
@@ -40,7 +43,7 @@ export default function BillingPage() {
       await payBill(currentBill.id)
       await refetchBills()
     } catch (err: unknown) {
-      setPayError(err instanceof Error ? err.message : "Payment failed.")
+      setPayError(err instanceof Error ? err.message : t.billing.payFailed)
     } finally {
       setPaying(false)
     }
@@ -54,21 +57,21 @@ export default function BillingPage() {
   return (
     <div className="flex flex-col h-full bg-[#f8f9fb]">
       <div className="bg-white">
-        <ScreenHeader title="Billing & Usage" onMenu={onMenu} />
+        <ScreenHeader title={t.billing.title} onMenu={onMenu} />
       </div>
       <div className="flex-1 overflow-y-auto pb-24 px-4 pt-4 space-y-4 fade-in">
-        {loading && <LoadingSpinner message="Fetching billing details..." />}
+        {loading && <LoadingSpinner message={t.billing.loading} />}
         {!loading && billsError && (
           <ErrorMessage
-            title="Could not load bills"
+            title={t.billing.loadFailed}
             message={billsError}
             onRetry={retryAll}
           />
         )}
         {!loading && !billsError && !currentBill && (
           <EmptyState
-            title="No bills found"
-            description="There are no bills for your connection yet."
+            title={t.billing.emptyTitle}
+            description={t.billing.emptyBody}
             icon="receipt_long"
           />
         )}
@@ -81,22 +84,22 @@ export default function BillingPage() {
               style={{ background: "linear-gradient(135deg, #002045, #0061a5)" }}
             >
               <div className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-1">
-                {currentBill.period} Bill
+                {currentBill.period} {t.billing.billSuffix}
               </div>
               <div className="text-4xl font-extrabold mb-0.5">
                 ₹ {currentBill.amount}
               </div>
               <div className="text-white/70 text-sm mb-5">
                 {currentBill.status === "Paid"
-                  ? `Paid on ${currentBill.billDate}`
-                  : `Due by ${currentBill.dueDate}`}
+                  ? `${t.billing.paidOn} ${currentBill.billDate}`
+                  : `${t.billing.dueBy} ${currentBill.dueDate}`}
               </div>
               <div className="grid grid-cols-2 gap-3 mb-5">
                 <div
                   className="rounded-2xl p-3"
                   style={{ background: "rgba(255,255,255,0.12)" }}
                 >
-                  <div className="text-white/65 text-xs mb-1">Connection ID</div>
+                  <div className="text-white/65 text-xs mb-1">{t.billing.connectionId}</div>
                   <div className="text-white text-sm font-bold">
                     {currentBill.consumerNumber}
                   </div>
@@ -106,10 +109,10 @@ export default function BillingPage() {
                   style={{ background: "rgba(255,255,255,0.12)" }}
                 >
                   <div className="text-white/65 text-xs mb-1">
-                    Usage This Month
+                    {t.billing.usageMonth}
                   </div>
                   <div className="text-white text-sm font-bold">
-                    {currentUsage.toLocaleString()} L of {QUOTA_L.toLocaleString()} L
+                    {currentUsage.toLocaleString()} {t.billing.unit} {t.billing.of} {QUOTA_L.toLocaleString()} {t.billing.unit}
                   </div>
                 </div>
               </div>
@@ -123,29 +126,28 @@ export default function BillingPage() {
                   <button
                     onClick={handlePay}
                     disabled={paying}
-                    className="flex-1 py-3 rounded-full text-sm font-bold text-[#002045] disabled:opacity-60"
-                    style={{
-                      background: "#66affe",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
+                    className="btn-primary flex-1"
                   >
-                    {paying ? "Processing…" : "Pay Now"}
+                    {paying ? (
+                      <span className="btn-spinner" />
+                    ) : (
+                      t.billing.payNow
+                    )}
                   </button>
                 ) : (
-                  <div className="flex-1 py-3 rounded-full text-sm font-bold text-center bg-[#b7f0cd] text-[#1a6936]">
-                    Paid ✓
+                  <div className="flex-1 py-3 rounded-xl text-sm font-bold text-center bg-[#b7f0cd] text-[#1a6936]">
+                    {t.billing.paid}
                   </div>
                 )}
                 <button
-                  className="flex-none px-4 py-3 rounded-full text-sm font-semibold text-white"
+                  className="flex-none px-4 py-3 rounded-xl text-sm font-semibold text-white"
                   style={{
                     background: "rgba(255,255,255,0.15)",
                     border: "1.5px solid rgba(255,255,255,0.3)",
                     cursor: "pointer",
                   }}
                 >
-                  Download Receipt
+                  {t.billing.receipt}
                 </button>
               </div>
             </div>
@@ -154,10 +156,10 @@ export default function BillingPage() {
             <div className="card-elevated p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="text-sm font-bold text-[#002045]">
-                  Monthly Usage vs. Quota
+                  {t.billing.quotaTitle}
                 </div>
                 <div className="text-xs text-[#8a909c]">
-                  {Math.round((currentUsage / QUOTA_L) * 100)}% used
+                  {Math.round((currentUsage / QUOTA_L) * 100)}% {t.billing.usedPct}
                 </div>
               </div>
               <div className="w-full h-3 rounded-full bg-[#e2e6ec] mb-2 overflow-hidden">
@@ -167,26 +169,26 @@ export default function BillingPage() {
                 />
               </div>
               <div className="flex justify-between text-xs text-[#8a909c]">
-                <span>{currentUsage.toLocaleString()} L used</span>
+                <span>{currentUsage.toLocaleString()} {t.billing.unit} {t.billing.used}</span>
                 <span>
-                  {Math.max(QUOTA_L - currentUsage, 0).toLocaleString()} L remaining
+                  {Math.max(QUOTA_L - currentUsage, 0).toLocaleString()} {t.billing.unit} {t.billing.remaining}
                 </span>
               </div>
 
               <div className="mt-4">
                 <div className="text-sm font-bold text-[#002045] mb-3">
-                  6-Month Usage (Litres)
+                  {t.billing.sixMonth}
                 </div>
                 {usageError ? (
                   <ErrorMessage
-                    title="Could not load usage"
+                    title={t.billing.usageFailed}
                     message={usageError}
                     onRetry={refetchUsage}
                   />
                 ) : usageLitres.length === 0 ? (
                   <EmptyState
-                    title="No usage data"
-                    description="Usage history is not available yet."
+                    title={t.billing.noUsage}
+                    description={t.billing.noUsageBody}
                     icon="water_drop"
                   />
                 ) : (
@@ -230,11 +232,10 @@ export default function BillingPage() {
               />
               <div>
                 <div className="text-xs font-bold text-[#002045] mb-1">
-                  Tariff Slab (Domestic)
+                  {t.billing.tariffTitle}
                 </div>
                 <div className="text-xs text-[#4a5060]">
-                  0–8,000 L: ₹ 5.50/100L · 8,001–12,000 L: ₹ 8.00/100L · Above
-                  12,000 L: ₹ 12.00/100L
+                  {t.billing.tariffBody}
                 </div>
               </div>
             </div>
@@ -242,11 +243,11 @@ export default function BillingPage() {
             {/* Bill History */}
             <div className="card-elevated p-5">
               <div className="text-sm font-bold text-[#002045] mb-4">
-                Bill History
+                {t.billing.history}
               </div>
               {history.length === 0 ? (
                 <div className="text-xs text-[#8a909c] text-center py-2">
-                  No previous bills.
+                  {t.billing.noHistory}
                 </div>
               ) : (
                 <div className="space-y-0">
@@ -265,7 +266,7 @@ export default function BillingPage() {
                           {b.period}
                         </div>
                         <div className="text-xs text-[#8a909c]">
-                          {b.status === "Paid" ? `Paid · ${b.billDate}` : `Due ${b.dueDate}`}
+                          {b.status === "Paid" ? `${t.billing.paidSep} ${b.billDate}` : `${t.billing.due} ${b.dueDate}`}
                         </div>
                       </div>
                       <div className="text-right">
@@ -279,7 +280,7 @@ export default function BillingPage() {
                               : "text-[#ba1a1a]"
                           }`}
                         >
-                          {b.status}
+                          {localizeStatus(b.status, t)}
                         </span>
                       </div>
                       <button
