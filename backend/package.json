@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "hydronexus-officer-backend",
   "version": "1.0.0",
   "private": true,
@@ -14,6 +15,21 @@
   "dependencies": {
     "@water/types": "file:../packages/types",
     "bcryptjs": "^2.4.3",
+=======
+  "name": "hydronexus-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HydroNexus municipal water management API (citizen-facing modules + shared repositories)",
+  "type": "commonjs",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+>>>>>>> main
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
@@ -21,6 +37,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.23",
@@ -28,5 +45,13 @@
     "@types/node": "^22.10.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
+=======
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.7.0"
+>>>>>>> main
   }
 }

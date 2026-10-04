@@ -1,0 +1,179 @@
+# HydroNexus Citizen Portal API collection
+# Base URL: http://localhost:8000/api/v1
+# Flow: request OTP -> verify OTP (dev OTP is 123456) -> copy @token to all calls below.
+# Every response envelope is { success, data } or { success:false, error:{...} }.
+
+@base = http://localhost:8000/api/v1
+@token = PASTE_JWT_HERE
+@phone = 9876543210
+
+### 1. AUTH — request OTP (public)
+POST {{base}}/auth/citizen/otp/request
+Content-Type: application/json
+
+{
+  "phone": "{{phone}}"
+}
+
+### 2. AUTH — verify OTP (public, dev OTP 123456; auto-registers new phones)
+POST {{base}}/auth/citizen/otp/verify
+Content-Type: application/json
+
+{
+  "phone": "{{phone}}",
+  "otp": "123456"
+}
+
+### 3. AUTH — refresh access token
+POST {{base}}/auth/citizen/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "PASTE_REFRESH_TOKEN_HERE"
+}
+
+### 4. AUTH — current session
+GET {{base}}/auth/me
+Authorization: Bearer {{token}}
+
+### 5. COMPLAINTS — create (type, ward, description required; photoUrl + GPS optional)
+POST {{base}}/complaints
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "Leakage",
+  "ward": "Ward 12 - Rankala",
+  "address": "Rankala Lake Road, Gate 3",
+  "description": "Water overflowing from underground pipe near the gate",
+  "priority": "High",
+  "latitude": 16.6954,
+  "longitude": 74.2317
+}
+
+### 6. COMPLAINTS — list my complaints (paginated; ?status=&type=&page=&pageSize=)
+GET {{base}}/complaints?page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+### 7. COMPLAINTS — list filtered by status
+GET {{base}}/complaints?status=Open
+Authorization: Bearer {{token}}
+
+### 8. COMPLAINTS — detail with timeline
+GET {{base}}/complaints/CMP-2024-0891
+Authorization: Bearer {{token}}
+
+### 9. COMPLAINTS — status update (officer roles only; Open -> Assigned -> In Progress -> Resolved)
+PATCH {{base}}/complaints/CMP-2024-0891
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "Assigned",
+  "assigned": "Anil Jadhav",
+  "note": "Assigned to ward engineer"
+}
+
+### 10. CITIZEN — my profile
+GET {{base}}/citizens/me
+Authorization: Bearer {{token}}
+
+### 11. CITIZEN — update profile
+PATCH {{base}}/citizens/me
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Sunita Anand Patil",
+  "email": "sunita.patil@gmail.com",
+  "address": "Plot 12, Lake View Colony, Rankala"
+}
+
+### 12. CITIZEN — linked water connection
+GET {{base}}/citizens/me/connection
+Authorization: Bearer {{token}}
+
+### 13. CITIZEN — new connection applications
+GET {{base}}/citizens/applications
+Authorization: Bearer {{token}}
+
+### 14. CITIZEN — officer service-request queue (shared store, openapi path)
+GET {{base}}/citizens/requests
+Authorization: Bearer {{token}}
+
+### 15. BILLING — history
+GET {{base}}/billing/bills
+Authorization: Bearer {{token}}
+
+### 16. BILLING — current bill
+GET {{base}}/billing/bills/current
+Authorization: Bearer {{token}}
+
+### 17. BILLING — consumption trend (usage charts)
+GET {{base}}/billing/usage
+Authorization: Bearer {{token}}
+
+### 18. BILLING — pay (openapi shape)
+POST {{base}}/billing/pay
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "billId": "BIL-2026-09-4872"
+}
+
+### 19. BILLING — pay (api-client path alias)
+POST {{base}}/billing/bills/BIL-2026-09-4872/pay
+Authorization: Bearer {{token}}
+
+### 20. NOTIFICATIONS — alerts for my ward (with read flags)
+GET {{base}}/alerts
+Authorization: Bearer {{token}}
+
+### 21. NOTIFICATIONS — unread count
+GET {{base}}/alerts/unread-count
+Authorization: Bearer {{token}}
+
+### 22. NOTIFICATIONS — mark as read
+POST {{base}}/alerts/1/read
+Authorization: Bearer {{token}}
+
+### 23. NOTICE BOARD — public circulars (no auth required)
+GET {{base}}/notices
+
+### 24. TANKER — create request (ward, address required; urgency + slot optional)
+POST {{base}}/citizens/service-requests/tanker
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "ward": "Ward 12 - Rankala",
+  "address": "Plot 12, Lake View Colony, Rankala",
+  "urgency": "Emergency",
+  "timeSlot": "Morning 6-9 AM",
+  "capacityKL": 5
+}
+
+### 25. SERVICES — general request (meter service / quality test)
+POST {{base}}/citizens/service-requests
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "ward": "Ward 12 - Rankala",
+  "address": "Plot 12, Lake View Colony, Rankala",
+  "serviceType": "Water Quality Testing",
+  "notes": "Muddy water since yesterday"
+}
+
+### 26. SERVICES — my requests
+GET {{base}}/citizens/service-requests
+Authorization: Bearer {{token}}
+
+### 27. SERVICES — request status (Requested/Approved/Dispatched/Delivered via citizenStatus)
+GET {{base}}/citizens/service-requests/SRQ-882
+Authorization: Bearer {{token}}
+
+### 28. CONSERVATION — my usage vs ward average
+GET {{base}}/conservation/usage-vs-ward
+Authorization: Bearer {{token}}
