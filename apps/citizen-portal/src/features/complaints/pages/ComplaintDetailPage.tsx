@@ -1,64 +1,114 @@
 import { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Icon, StatusBadge, ScreenHeader } from "@/components/CommonUI"
-import { complaints, type Complaint } from "@/mocks/citizenData"
+import { useComplaintDetail } from "@/hooks/useCitizenData"
+import { LoadingSpinner, EmptyState, ErrorMessage } from "@water/ui"
 
 export default function ComplaintDetailPage() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const onBack = () => navigate("/complaints")
-  const complaint = complaints.find((c) => c.id === id) || complaints[0]
+  const { complaint, loading, error, refetch } = useComplaintDetail(id)
   const [comment, setComment] = useState("")
   const [rated, setRated] = useState(0)
 
-  const timeline = [
-    { label: "Submitted", date: complaint.date, done: true, icon: "send" },
-    {
-      label: "Assigned to Officer",
-      date: "9 Sep 2026",
-      done: complaint.status !== "Open",
-      icon: "person_pin",
-    },
-    {
-      label: "In Progress",
-      date:
-        complaint.status === "In Progress"
-          ? "Today"
-          : complaint.status === "Resolved"
-            ? "10 Sep 2026"
-            : "—",
-      done:
-        complaint.status === "In Progress" || complaint.status === "Resolved",
-      icon: "build",
-    },
-    {
-      label: "Resolved",
-      date: complaint.status === "Resolved" ? "11 Sep 2026" : "—",
-      done: complaint.status === "Resolved",
-      icon: "check_circle",
-    },
-  ]
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full bg-[#f8f9fb]">
+        <div className="bg-white">
+          <ScreenHeader title="Complaint Detail" onBack={onBack} />
+        </div>
+        <div className="flex-1 px-4 pt-4">
+          <LoadingSpinner message="Fetching complaint details..." />
+        </div>
+      </div>
+    )
+  }
 
-  const messages = [
-    {
-      from: "officer",
-      name: "Jr. Eng. Ramesh Kulkarni",
-      time: "9 Sep, 2:15 PM",
-      text: "Complaint received and assigned. Our team will inspect the site by tomorrow morning.",
-    },
-    {
-      from: "me",
-      name: "You",
-      time: "9 Sep, 2:30 PM",
-      text: "Thank you. The leak is getting worse — water is spreading to the road.",
-    },
-    {
-      from: "officer",
-      name: "Jr. Eng. Ramesh Kulkarni",
-      time: "10 Sep, 9:00 AM",
-      text: "Team has been dispatched. ETA: 30 minutes. Please ensure access to the pipeline area.",
-    },
-  ]
+  if (error) {
+    return (
+      <div className="flex flex-col h-full bg-[#f8f9fb]">
+        <div className="bg-white">
+          <ScreenHeader title="Complaint Detail" onBack={onBack} />
+        </div>
+        <div className="flex-1 px-4 pt-4">
+          <ErrorMessage
+            title="Could not load complaint"
+            message={error}
+            onRetry={refetch}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  if (!complaint) {
+    return (
+      <div className="flex flex-col h-full bg-[#f8f9fb]">
+        <div className="bg-white">
+          <ScreenHeader title="Complaint Detail" onBack={onBack} />
+        </div>
+        <div className="flex-1 px-4 pt-4">
+          <EmptyState
+            title="Complaint not found"
+            description="This complaint may have been removed or the link is incorrect."
+            icon="search_off"
+          />
+        </div>
+      </div>
+    )
+  }
+
+  const timeline = complaint.timeline
+    ? [
+        { label: "Submitted", date: complaint.date || "", done: true, icon: "send" },
+        ...complaint.timeline.map((t) => ({
+          label: t.status,
+          date: t.time,
+          done: true,
+          icon: "build",
+        })),
+        ...(complaint.status === "Resolved"
+          ? []
+          : [
+              {
+                label: "Resolved",
+                date: "—",
+                done: false,
+                icon: "check_circle",
+              },
+            ]),
+      ]
+    : [
+        { label: "Submitted", date: complaint.date || "", done: true, icon: "send" },
+        {
+          label: "Assigned to Officer",
+          date: complaint.assigned ? "Assigned" : "—",
+          done: complaint.status !== "Open",
+          icon: "person_pin",
+        },
+        {
+          label: "In Progress",
+          date:
+            complaint.status === "In Progress"
+              ? "Today"
+              : complaint.status === "Resolved"
+                ? complaint.updated || "Done"
+                : "—",
+          done:
+            complaint.status === "In Progress" ||
+            complaint.status === "Resolved",
+          icon: "build",
+        },
+        {
+          label: "Resolved",
+          date: complaint.status === "Resolved" ? complaint.updated || "" : "—",
+          done: complaint.status === "Resolved",
+          icon: "check_circle",
+        },
+      ]
+
+  const messages = complaint.messages || []
 
   return (
     <div className="flex flex-col h-full bg-[#f8f9fb]">
@@ -72,7 +122,7 @@ export default function ComplaintDetailPage() {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-[#e8f1ff] flex items-center justify-center">
                 <Icon
-                  name={complaint.icon}
+                  name={complaint.icon || "report_problem"}
                   size={26}
                   className="text-[#0061a5]"
                 />
@@ -92,7 +142,7 @@ export default function ComplaintDetailPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-xs text-[#8a909c]">
               <Icon name="location_on" size={14} className="text-[#0061a5]" />
-              {complaint.location}
+              {complaint.location || complaint.address || complaint.ward}
             </div>
             <div className="flex items-center gap-2 text-xs text-[#8a909c]">
               <Icon name="apartment" size={14} className="text-[#0061a5]" />
@@ -104,7 +154,7 @@ export default function ComplaintDetailPage() {
                 size={14}
                 className="text-[#0061a5]"
               />
-              Filed on {complaint.date}
+              Filed on {complaint.date || complaint.reported || "—"}
             </div>
           </div>
         </div>
@@ -170,36 +220,45 @@ export default function ComplaintDetailPage() {
             Communication
           </div>
           <div className="space-y-3 mb-4">
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`flex ${
-                  m.from === "me" ? "justify-end" : "justify-start"
-                }`}
-              >
+            {messages.length === 0 && (
+              <div className="text-xs text-[#8a909c] text-center py-2">
+                No messages yet. Our team will respond here once your complaint
+                is assigned.
+              </div>
+            )}
+            {messages.map((m, i) => {
+              const isMe = !m.isOfficer && m.sender === "You"
+              return (
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    m.from === "me"
-                      ? "bg-[#002045] text-white rounded-tr-sm"
-                      : "bg-[#f0f2f5] text-[#1a1d24] rounded-tl-sm"
+                  key={i}
+                  className={`flex ${
+                    isMe ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {m.from !== "me" && (
-                    <div className="text-[10px] font-bold text-[#0061a5] mb-1">
-                      {m.name}
-                    </div>
-                  )}
-                  <div className="text-sm leading-snug">{m.text}</div>
                   <div
-                    className={`text-[10px] mt-1.5 ${
-                      m.from === "me" ? "text-white/60" : "text-[#8a909c]"
+                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                      isMe
+                        ? "bg-[#002045] text-white rounded-tr-sm"
+                        : "bg-[#f0f2f5] text-[#1a1d24] rounded-tl-sm"
                     }`}
                   >
-                    {m.time}
+                    {!isMe && (
+                      <div className="text-[10px] font-bold text-[#0061a5] mb-1">
+                        {m.sender}
+                      </div>
+                    )}
+                    <div className="text-sm leading-snug">{m.text}</div>
+                    <div
+                      className={`text-[10px] mt-1.5 ${
+                        isMe ? "text-white/60" : "text-[#8a909c]"
+                      }`}
+                    >
+                      {m.time}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
           <div className="flex gap-2">
             <input

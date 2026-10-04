@@ -101,7 +101,7 @@ export default function TankerRequestPage() {
           </div>
 
           <button
-            className="btn-primary w-full"
+            className="btn-primary"
             onClick={() => onNavigate("home")}
           >
             Return to Home
@@ -196,7 +196,7 @@ export default function TankerRequestPage() {
       </div>
 
       <div
-        className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-4 bg-white border-t border-gray-100 z-10"
+        className="fixed bottom-16 left-0 right-0 px-4 pb-3 pt-2 bg-white border-t border-gray-100 z-10 safe-area-bottom"
         style={{
           maxWidth: 430,
           margin: "0 auto",
@@ -205,10 +205,9 @@ export default function TankerRequestPage() {
         }}
       >
         <button
-          className="btn-primary w-full"
+          className="btn-primary"
           onClick={() => setSubmitted(true)}
           disabled={!slot}
-          style={{ opacity: slot ? 1 : 0.5 }}
         >
           Submit Request
         </button>

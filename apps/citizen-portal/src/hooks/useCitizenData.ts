@@ -9,7 +9,9 @@ import {
   type SupplyScheduleItem,
   type Outage,
   type Bill,
+  type UsageDataPoint,
   type Alert,
+  type Notice,
   type WaterConnectionApplication,
   type ServiceRequest,
 } from "@/services/api"
@@ -135,6 +137,87 @@ export function useCitizenAlerts() {
   }, [fetchAlerts])
 
   return { alerts, loading, error, refetch: fetchAlerts }
+}
+
+export function useCitizenNotices() {
+  const [notices, setNotices] = useState<Notice[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchNotices = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await alertsApi.getNotices()
+      setNotices(res.data)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to fetch notices")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchNotices()
+  }, [fetchNotices])
+
+  return { notices, loading, error, refetch: fetchNotices }
+}
+
+export function useCitizenUsage() {
+  const [usage, setUsage] = useState<UsageDataPoint[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchUsage = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await billingApi.getUsage()
+      setUsage(res.data)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to fetch usage")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchUsage()
+  }, [fetchUsage])
+
+  return { usage, loading, error, refetch: fetchUsage }
+}
+
+export function useComplaintDetail(id: string | undefined) {
+  const [complaint, setComplaint] = useState<Complaint | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchDetail = useCallback(async () => {
+    if (!id) {
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await complaintsApi.getComplaintById(id)
+      setComplaint(res.data)
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch complaint",
+      )
+    } finally {
+      setLoading(false)
+    }
+  }, [id])
+
+  useEffect(() => {
+    fetchDetail()
+  }, [fetchDetail])
+
+  return { complaint, loading, error, refetch: fetchDetail }
 }
 
 export function useCitizenServices() {

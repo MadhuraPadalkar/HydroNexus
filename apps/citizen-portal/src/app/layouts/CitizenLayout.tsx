@@ -1,34 +1,39 @@
 import { useState, useEffect } from "react"
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom"
 import { Icon } from "@/components/CommonUI"
+import { useLanguage } from "@/i18n/LanguageContext"
+import type { AppStrings } from "@/i18n/translations"
 
 interface MenuItem {
   path: string
   icon: string
-  label: string
+  labelKey: keyof AppStrings["layout"]["menu"]
 }
 
 const MENU_ITEMS: MenuItem[] = [
-  { path: "/", icon: "home", label: "Dashboard" },
-  { path: "/services", icon: "water_drop", label: "Water Services" },
-  { path: "/supply-status", icon: "schedule", label: "Supply Status" },
-  { path: "/report", icon: "report_problem", label: "Report Issue" },
-  { path: "/complaints", icon: "assignment", label: "My Complaints" },
-  { path: "/billing", icon: "receipt_long", label: "Billing & Usage" },
-  { path: "/conservation", icon: "eco", label: "Water Conservation" },
-  { path: "/map", icon: "map", label: "Interactive Map" },
-  { path: "/alerts", icon: "notifications", label: "Alerts" },
-  { path: "/noticeboard", icon: "campaign", label: "Notice Board" },
-  { path: "/faq", icon: "help", label: "Help & FAQs" },
-  { path: "/profile", icon: "person", label: "Profile" },
+  { path: "/", icon: "home", labelKey: "dashboard" },
+  { path: "/services", icon: "water_drop", labelKey: "services" },
+  { path: "/supply-status", icon: "schedule", labelKey: "supply" },
+  { path: "/report", icon: "report_problem", labelKey: "report" },
+  { path: "/complaints", icon: "assignment", labelKey: "complaints" },
+  { path: "/billing", icon: "receipt_long", labelKey: "billing" },
+  { path: "/conservation", icon: "eco", labelKey: "conservation" },
+  { path: "/alerts", icon: "notifications", labelKey: "alerts" },
+  { path: "/noticeboard", icon: "campaign", labelKey: "noticeboard" },
+  { path: "/faq", icon: "help", labelKey: "faq" },
+  { path: "/profile", icon: "person", labelKey: "profile" },
 ]
 
-const BOTTOM_TABS = [
-  { path: "/", icon: "home", label: "Home" },
-  { path: "/report", icon: "add_circle", label: "Report" },
-  { path: "/complaints", icon: "assignment", label: "Complaints" },
-  { path: "/alerts", icon: "notifications", label: "Alerts" },
-  { path: "/profile", icon: "person", label: "Profile" },
+const BOTTOM_TABS: Array<{
+  path: string
+  icon: string
+  labelKey: keyof AppStrings["layout"]["tabs"]
+}> = [
+  { path: "/", icon: "home", labelKey: "home" },
+  { path: "/report", icon: "add_circle", labelKey: "report" },
+  { path: "/complaints", icon: "assignment", labelKey: "complaints" },
+  { path: "/alerts", icon: "notifications", labelKey: "alerts" },
+  { path: "/profile", icon: "person", labelKey: "profile" },
 ]
 
 export interface CitizenOutletContext {
@@ -39,6 +44,7 @@ export default function CitizenLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
+  const { lang, setLang, t } = useLanguage()
 
   const isTabActive = (path: string) => {
     if (path === "/") return location.pathname === "/"
@@ -47,9 +53,11 @@ export default function CitizenLayout() {
 
   useEffect(() => {
     const activeItem = MENU_ITEMS.find((m) => m.path === location.pathname)
-    const title = activeItem ? activeItem.label : "Citizen Services"
+    const title = activeItem
+      ? t.layout.menu[activeItem.labelKey]
+      : t.layout.defaultTitle
     document.title = `${title} | HydroNexus Citizen Portal`
-  }, [location.pathname])
+  }, [location.pathname, t])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#1a1d24]">
@@ -65,7 +73,7 @@ export default function CitizenLayout() {
 
         {/* Bottom Navigation Bar */}
         <nav
-          className="fixed bottom-0 z-30 w-full max-w-[430px] bg-white/95 backdrop-blur-md border-t border-gray-100 flex items-center justify-around py-2 px-1 shadow-lg"
+          className="fixed bottom-0 z-30 w-full max-w-[430px] bg-white/95 backdrop-blur-md border-t border-gray-100 flex items-center justify-around py-2 px-1 shadow-lg safe-area-bottom"
           style={{ maxWidth: 430 }}
         >
           {BOTTOM_TABS.map((tab) => {
@@ -87,7 +95,7 @@ export default function CitizenLayout() {
                     active ? "font-bold" : "font-medium"
                   }`}
                 >
-                  {tab.label}
+                  {t.layout.tabs[tab.labelKey]}
                 </span>
               </NavLink>
             )
@@ -154,14 +162,31 @@ export default function CitizenLayout() {
                     className={active ? "text-[#002045]" : "text-[#8a909c]"}
                     filled={active}
                   />
-                  <span className="text-sm">{item.label}</span>
+                  <span className="text-sm">{t.layout.menu[item.labelKey]}</span>
                 </button>
               )
             })}
           </div>
 
-          {/* Drawer Footer / Sign Out */}
-          <div className="p-4 border-t border-gray-100">
+          {/* Drawer Footer / Language + Sign Out */}
+          <div className="p-4 border-t border-gray-100 space-y-2">
+            <div className="flex gap-2">
+              {(["en", "mr"] as const).map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
+                  style={{
+                    background: lang === l ? "#002045" : "#f0f2f5",
+                    color: lang === l ? "#fff" : "#4a5060",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  {l === "en" ? t.profile.english : t.profile.marathi}
+                </button>
+              ))}
+            </div>
             <button
               onClick={() => {
                 navigate("/login")
@@ -171,7 +196,9 @@ export default function CitizenLayout() {
               style={{ border: "none" }}
             >
               <Icon name="logout" size={22} />
-              <span className="text-sm font-semibold">Sign Out</span>
+              <span className="text-sm font-semibold">
+                {t.layout.signOut}
+              </span>
             </button>
           </div>
         </div>

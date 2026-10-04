@@ -1,10 +1,7 @@
 import { useState } from "react"
 import { useNavigate, useOutletContext } from "react-router-dom"
 import { Icon, StatusBadge, ScreenHeader } from "@/components/CommonUI"
-import {
-  complaints as initialComplaints,
-  type Complaint,
-} from "@/mocks/citizenData"
+import type { Complaint } from "@/services/api"
 import { useCitizenComplaints } from "@/hooks/useCitizenData"
 import { LoadingSpinner, EmptyState, ErrorMessage } from "@water/ui"
 import type { CitizenOutletContext } from "@/app/layouts/CitizenLayout"
@@ -12,16 +9,7 @@ import type { CitizenOutletContext } from "@/app/layouts/CitizenLayout"
 export default function ComplaintsListPage() {
   const navigate = useNavigate()
   const { onMenu } = useOutletContext<CitizenOutletContext>()
-  const {
-    complaints: apiComplaints,
-    loading,
-    error,
-    refetch,
-  } = useCitizenComplaints()
-  const complaints =
-    apiComplaints.length > 0
-      ? apiComplaints as unknown as Complaint[]
-      : initialComplaints
+  const { complaints, loading, error, refetch } = useCitizenComplaints()
   const onComplaintDetail = (c: Complaint) => navigate("/complaints/" + c.id)
   const [filter, setFilter] = useState("All")
 
@@ -91,7 +79,7 @@ export default function ComplaintsListPage() {
                 }}
               >
                 <Icon
-                  name={c.icon}
+                  name={c.icon || "report_problem"}
                   size={24}
                   className={
                     c.status === "Open"
