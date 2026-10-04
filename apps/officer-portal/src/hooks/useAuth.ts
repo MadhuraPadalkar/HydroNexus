@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { authApi, type UserSession } from "@/services/api"
+import { authApi, isMockMode, type UserSession } from "@/services/api"
 
 export function useAuth() {
   const [session, setSession] = useState<UserSession | null>(() =>
@@ -32,7 +32,9 @@ export function useAuth() {
 
   return {
     session,
-    isAuthenticated: !!session || true, // default authenticated in mock mode unless explicitly logged out
+    // Mock mode stays authenticated for instant dev experience; real mode
+    // (VITE_USE_MOCKS=false) requires an actual login session.
+    isAuthenticated: isMockMode() ? true : !!session,
     loading,
     login,
     logout,
