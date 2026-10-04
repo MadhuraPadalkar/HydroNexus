@@ -17,7 +17,7 @@ export default function ReportIssuePage() {
   const [desc, setDesc] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [photo, setPhoto] = useState<string | null>(null)
-  const [coords, setCoords] = useState<{ lat: number lng: number } | null>(null)
+  const [coords, setCoords] = useState<{ lat: number ;lng: number } | null>(null)
   const [photoBusy, setPhotoBusy] = useState(false)
   const [locBusy, setLocBusy] = useState(false)
   const [notice, setNotice] = useState("")
