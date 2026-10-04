@@ -31,9 +31,13 @@ export default function BillingPage() {
   const loading = billsLoading || usageLoading
   const currentBill = bills.find((b) => b.status !== "Paid") || bills[0]
   const history = bills.slice(1)
-  const usageLitres = usage.map((d) => ({ month: d.month, usage: d.usage * 1000 }))
+  const usageLitres = usage.map((d) => ({
+    month: d.month,
+    usage: d.usage * 1000,
+  }))
   const maxUsage = Math.max(...usageLitres.map((d) => d.usage), 1)
-  const currentUsage = usageLitres.length > 0 ? usageLitres[usageLitres.length - 1]!.usage : 0
+  const currentUsage =
+    usageLitres.length > 0 ? usageLitres[usageLitres.length - 1]!.usage : 0
 
   const handlePay = async () => {
     if (!currentBill || paying) return
@@ -81,7 +85,9 @@ export default function BillingPage() {
             {/* Current Bill */}
             <div
               className="rounded-3xl p-6 text-white"
-              style={{ background: "linear-gradient(135deg, #002045, #0061a5)" }}
+              style={{
+                background: "linear-gradient(135deg, #002045, #0061a5)",
+              }}
             >
               <div className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-1">
                 {currentBill.period} {t.billing.billSuffix}
@@ -99,7 +105,9 @@ export default function BillingPage() {
                   className="rounded-2xl p-3"
                   style={{ background: "rgba(255,255,255,0.12)" }}
                 >
-                  <div className="text-white/65 text-xs mb-1">{t.billing.connectionId}</div>
+                  <div className="text-white/65 text-xs mb-1">
+                    {t.billing.connectionId}
+                  </div>
                   <div className="text-white text-sm font-bold">
                     {currentBill.consumerNumber}
                   </div>
@@ -112,7 +120,8 @@ export default function BillingPage() {
                     {t.billing.usageMonth}
                   </div>
                   <div className="text-white text-sm font-bold">
-                    {currentUsage.toLocaleString()} {t.billing.unit} {t.billing.of} {QUOTA_L.toLocaleString()} {t.billing.unit}
+                    {currentUsage.toLocaleString()} {t.billing.unit}{" "}
+                    {t.billing.of} {QUOTA_L.toLocaleString()} {t.billing.unit}
                   </div>
                 </div>
               </div>
@@ -159,19 +168,26 @@ export default function BillingPage() {
                   {t.billing.quotaTitle}
                 </div>
                 <div className="text-xs text-[#8a909c]">
-                  {Math.round((currentUsage / QUOTA_L) * 100)}% {t.billing.usedPct}
+                  {Math.round((currentUsage / QUOTA_L) * 100)}%{" "}
+                  {t.billing.usedPct}
                 </div>
               </div>
               <div className="w-full h-3 rounded-full bg-[#e2e6ec] mb-2 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-[#0061a5] transition-all"
-                  style={{ width: `${Math.min((currentUsage / QUOTA_L) * 100, 100)}%` }}
+                  style={{
+                    width: `${Math.min((currentUsage / QUOTA_L) * 100, 100)}%`,
+                  }}
                 />
               </div>
               <div className="flex justify-between text-xs text-[#8a909c]">
-                <span>{currentUsage.toLocaleString()} {t.billing.unit} {t.billing.used}</span>
                 <span>
-                  {Math.max(QUOTA_L - currentUsage, 0).toLocaleString()} {t.billing.unit} {t.billing.remaining}
+                  {currentUsage.toLocaleString()} {t.billing.unit}{" "}
+                  {t.billing.used}
+                </span>
+                <span>
+                  {Math.max(QUOTA_L - currentUsage, 0).toLocaleString()}{" "}
+                  {t.billing.unit} {t.billing.remaining}
                 </span>
               </div>
 
@@ -259,14 +275,20 @@ export default function BillingPage() {
                       }`}
                     >
                       <div className="w-10 h-10 rounded-2xl bg-[#b7f0cd] flex items-center justify-center flex-shrink-0">
-                        <Icon name="receipt" size={20} className="text-[#1a6936]" />
+                        <Icon
+                          name="receipt"
+                          size={20}
+                          className="text-[#1a6936]"
+                        />
                       </div>
                       <div className="flex-1">
                         <div className="text-sm font-semibold text-[#1a1d24]">
                           {b.period}
                         </div>
                         <div className="text-xs text-[#8a909c]">
-                          {b.status === "Paid" ? `${t.billing.paidSep} ${b.billDate}` : `${t.billing.due} ${b.dueDate}`}
+                          {b.status === "Paid"
+                            ? `${t.billing.paidSep} ${b.billDate}`
+                            : `${t.billing.due} ${b.dueDate}`}
                         </div>
                       </div>
                       <div className="text-right">
@@ -290,7 +312,11 @@ export default function BillingPage() {
                           cursor: "pointer",
                         }}
                       >
-                        <Icon name="download" size={18} className="text-[#8a909c]" />
+                        <Icon
+                          name="download"
+                          size={18}
+                          className="text-[#8a909c]"
+                        />
                       </button>
                     </div>
                   ))}

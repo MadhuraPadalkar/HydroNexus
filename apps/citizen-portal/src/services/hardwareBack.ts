@@ -1,10 +1,10 @@
-import { Capacitor } from "@capacitor/core";
-import { App } from "@capacitor/app";
-import type { createBrowserRouter } from "react-router-dom";
+import { Capacitor } from "@capacitor/core"
+import { App } from "@capacitor/app"
+import type { createBrowserRouter } from "react-router-dom"
 
-type Router = ReturnType<typeof createBrowserRouter>;
+type Router = ReturnType<typeof createBrowserRouter>
 
-let started = false;
+let started = false
 
 /**
  * Hardware back button (Task 5):
@@ -13,19 +13,19 @@ let started = false;
  * - No-ops on web so desktop/mobile browsers keep default behaviour.
  */
 export function initHardwareBackButton(router: Router): void {
-  if (started) return;
-  started = true;
+  if (started) return
+  started = true
 
-  if (!Capacitor.isNativePlatform()) return;
+  if (!Capacitor.isNativePlatform()) return
 
   App.addListener("backButton", () => {
-    const pathname = router.state.location.pathname;
+    const pathname = router.state.location.pathname
     if (pathname === "/" || pathname === "/welcome") {
-      App.exitApp();
+      App.exitApp()
     } else if (window.history.length > 1) {
-      router.navigate(-1);
+      router.navigate(-1)
     } else {
-      router.navigate("/");
+      router.navigate("/")
     }
-  });
+  })
 }

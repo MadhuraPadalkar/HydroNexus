@@ -15,8 +15,7 @@ export default function FaqPage() {
     q.length === 0
       ? t.faq.faqs
       : t.faq.faqs.filter(
-          (f) =>
-            f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q),
+          (f) => f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q),
         )
 
   return (
@@ -58,17 +57,11 @@ export default function FaqPage() {
 
         {faqs.length === 0 ? (
           <div className="card-elevated p-6 text-center">
-            <Icon
-              name="search_off"
-              size={32}
-              className="text-[#c8cdd6] mb-2"
-            />
+            <Icon name="search_off" size={32} className="text-[#c8cdd6] mb-2" />
             <div className="text-sm font-bold text-[#002045] mb-1">
               {t.faq.noResultsTitle}
             </div>
-            <div className="text-xs text-[#8a909c]">
-              {t.faq.noResultsBody}
-            </div>
+            <div className="text-xs text-[#8a909c]">{t.faq.noResultsBody}</div>
           </div>
         ) : (
           <div className="space-y-3">

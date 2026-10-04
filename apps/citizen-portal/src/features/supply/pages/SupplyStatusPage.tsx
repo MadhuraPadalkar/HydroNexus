@@ -58,7 +58,9 @@ export default function SupplyStatusPage() {
                 {supplyOn ? t.supply.on : t.supply.off}
               </div>
               <div className="text-sm text-[#4a5060] mt-1">
-                {myZone ? `${myZone.ward} — ${myZone.zone} ${t.supply.zoneSuffix}` : t.supply.fallbackZone}
+                {myZone
+                  ? `${myZone.ward} — ${myZone.zone} ${t.supply.zoneSuffix}`
+                  : t.supply.fallbackZone}
               </div>
             </div>
 
@@ -119,12 +121,14 @@ export default function SupplyStatusPage() {
                     />
                     <div>
                       <div className="text-sm font-bold text-[#ba1a1a] mb-1">
-                        {o.type === "Emergency" ? t.supply.outage : t.supply.planned} —{" "}
-                        {o.ward}
+                        {o.type === "Emergency"
+                          ? t.supply.outage
+                          : t.supply.planned}{" "}
+                        — {o.ward}
                       </div>
                       <div className="text-xs text-[#4a5060] leading-relaxed">
-                        {o.reason}. {t.supply.started} {o.startTime}. {t.supply.restoration}{" "}
-                        {o.estimatedRestoration}.
+                        {o.reason}. {t.supply.started} {o.startTime}.{" "}
+                        {t.supply.restoration} {o.estimatedRestoration}.
                         {o.tankersDispatched > 0 &&
                           ` ${o.tankersDispatched} ${t.supply.tankers}`}
                       </div>

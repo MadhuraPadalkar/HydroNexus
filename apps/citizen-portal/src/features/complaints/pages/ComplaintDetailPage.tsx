@@ -83,7 +83,12 @@ export default function ComplaintDetailPage() {
 
   const timeline = complaint.timeline
     ? [
-        { label: "Submitted", date: complaint.date || "", done: true, icon: "send" },
+        {
+          label: "Submitted",
+          date: complaint.date || "",
+          done: true,
+          icon: "send",
+        },
         ...complaint.timeline.map((t) => ({
           label: t.status,
           date: t.time,
@@ -102,7 +107,12 @@ export default function ComplaintDetailPage() {
             ]),
       ]
     : [
-        { label: "Submitted", date: complaint.date || "", done: true, icon: "send" },
+        {
+          label: "Submitted",
+          date: complaint.date || "",
+          done: true,
+          icon: "send",
+        },
         {
           label: "Assigned to Officer",
           date: complaint.assigned ? "Assigned" : "—",
@@ -229,7 +239,9 @@ export default function ComplaintDetailPage() {
                   >
                     {stepLabel(step.label, t)}
                   </div>
-                  <div className="text-xs text-[#8a909c]">{stepDate(step.date, t)}</div>
+                  <div className="text-xs text-[#8a909c]">
+                    {stepDate(step.date, t)}
+                  </div>
                 </div>
               </div>
             ))}
@@ -252,9 +264,7 @@ export default function ComplaintDetailPage() {
               return (
                 <div
                   key={i}
-                  className={`flex ${
-                    isMe ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${isMe ? "justify-end" : "justify-start"}`}
                 >
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${

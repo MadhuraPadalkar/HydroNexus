@@ -17,9 +17,7 @@ export default function ReportIssuePage() {
   const [desc, setDesc] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [photo, setPhoto] = useState<string | null>(null)
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
-    null,
-  )
+  const [coords, setCoords] = useState<{ lat: number lng: number } | null>(null)
   const [photoBusy, setPhotoBusy] = useState(false)
   const [locBusy, setLocBusy] = useState(false)
   const [notice, setNotice] = useState("")
@@ -121,7 +119,9 @@ export default function ReportIssuePage() {
             </div>
           </div>
           <div className="card-filled w-full p-4 text-left">
-            <div className="text-xs text-[#8a909c] mb-1">{t.report.complaintId}</div>
+            <div className="text-xs text-[#8a909c] mb-1">
+              {t.report.complaintId}
+            </div>
             <div className="text-lg font-bold text-[#002045]">
               KMC-2026-3901
             </div>
@@ -129,10 +129,7 @@ export default function ReportIssuePage() {
               {t.report.expectedResolution}
             </div>
           </div>
-          <button
-            className="btn-primary"
-            onClick={() => setSubmitted(false)}
-          >
+          <button className="btn-primary" onClick={() => setSubmitted(false)}>
             {t.report.backHome}
           </button>
           <button
@@ -230,7 +227,9 @@ export default function ReportIssuePage() {
         {/* GPS Location */}
         <div className="card-elevated p-4">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-bold text-[#002045]">{t.report.location}</div>
+            <div className="text-sm font-bold text-[#002045]">
+              {t.report.location}
+            </div>
             <div className="flex items-center gap-1.5 text-xs text-[#1a6936]">
               <Icon name="my_location" size={14} className="text-[#1a6936]" />
               {t.report.gpsDetected}

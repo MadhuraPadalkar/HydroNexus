@@ -21,9 +21,7 @@ export default function LoginPage() {
       await requestOtp(phone)
       navigate("/verify-otp", { state: { phone } })
     } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : t.login.sendFailed,
-      )
+      setError(err instanceof Error ? err.message : t.login.sendFailed)
     }
   }
 
@@ -56,10 +54,10 @@ export default function LoginPage() {
       {/* Card */}
       <div className="flex-1 px-5 -mt-4">
         <div className="card-elevated p-6 fade-in shadow-md rounded-2xl bg-white border border-gray-100">
-          <h2 className="text-xl font-bold text-[#002045] mb-1">{t.login.title}</h2>
-          <p className="text-sm text-[#8a909c] mb-6">
-            {t.login.subtitle}
-          </p>
+          <h2 className="text-xl font-bold text-[#002045] mb-1">
+            {t.login.title}
+          </h2>
+          <p className="text-sm text-[#8a909c] mb-6">{t.login.subtitle}</p>
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
@@ -93,9 +91,7 @@ export default function LoginPage() {
               size={18}
               className="text-[#0061a5] flex-shrink-0 mt-0.5"
             />
-            <p className="text-xs text-[#0061a5]">
-              {t.login.otpInfo}
-            </p>
+            <p className="text-xs text-[#0061a5]">{t.login.otpInfo}</p>
           </div>
 
           <button
@@ -103,11 +99,7 @@ export default function LoginPage() {
             onClick={handleSendOtp}
             disabled={loading}
           >
-            {loading ? (
-              <span className="btn-spinner" />
-            ) : (
-              t.login.sendOtp
-            )}
+            {loading ? <span className="btn-spinner" /> : t.login.sendOtp}
           </button>
 
           <div className="mt-4 text-center">
@@ -123,19 +115,13 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-5 text-center">
-          <div className="text-xs text-[#8a909c]">
-            {t.login.agree}
-          </div>
-          <div className="text-xs text-[#0061a5] mt-0.5">
-            {t.login.terms}
-          </div>
+          <div className="text-xs text-[#8a909c]">{t.login.agree}</div>
+          <div className="text-xs text-[#0061a5] mt-0.5">{t.login.terms}</div>
         </div>
       </div>
 
       <div className="pb-8 text-center">
-        <div className="text-[10px] text-[#8a909c]">
-          {t.login.footer}
-        </div>
+        <div className="text-[10px] text-[#8a909c]">{t.login.footer}</div>
       </div>
     </div>
   )

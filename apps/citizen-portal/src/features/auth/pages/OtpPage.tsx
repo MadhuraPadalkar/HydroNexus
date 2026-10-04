@@ -74,7 +74,9 @@ export default function OtpPage() {
           <Icon name="sms" size={32} className="text-[#66affe]" />
         </div>
         <h1 className="text-2xl font-bold text-white mb-1">{t.otp.title}</h1>
-        <p className="text-white/65 text-sm">{t.otp.sentTo.replace("{phone}", phone)}</p>
+        <p className="text-white/65 text-sm">
+          {t.otp.sentTo.replace("{phone}", phone)}
+        </p>
       </div>
 
       <div className="flex-1 px-5 -mt-4">
@@ -119,11 +121,7 @@ export default function OtpPage() {
             onClick={handleVerify}
             disabled={loading}
           >
-            {loading ? (
-              <span className="btn-spinner" />
-            ) : (
-              t.otp.verify
-            )}
+            {loading ? <span className="btn-spinner" /> : t.otp.verify}
           </button>
 
           <div className="text-center">

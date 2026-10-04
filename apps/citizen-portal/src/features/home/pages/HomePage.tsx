@@ -150,9 +150,17 @@ export default function HomePage() {
               </div>
               <button
                 onClick={() => onNavigate("alerts")}
-                style={{ background: "none", border: "none", cursor: "pointer" }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
               >
-                <Icon name="chevron_right" size={18} className="text-[#ba1a1a]" />
+                <Icon
+                  name="chevron_right"
+                  size={18}
+                  className="text-[#ba1a1a]"
+                />
               </button>
             </div>
           )}
@@ -163,52 +171,50 @@ export default function HomePage() {
               {t.home.quickActions}
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {(
-                [
-                  {
-                    icon: "water_drop",
-                    key: "services",
-                    screen: "services",
-                    color: "#002045",
-                    bg: "#e8f1ff",
-                  },
-                  {
-                    icon: "schedule",
-                    key: "supply",
-                    screen: "supply-status",
-                    color: "#1a6936",
-                    bg: "#b7f0cd",
-                  },
-                  {
-                    icon: "plumbing",
-                    key: "report",
-                    screen: "report",
-                    color: "#ba1a1a",
-                    bg: "#ffdad6",
-                  },
-                  {
-                    icon: "assignment",
-                    key: "complaints",
-                    screen: "complaints",
-                    color: "#0061a5",
-                    bg: "#e8f1ff",
-                  },
-                  {
-                    icon: "receipt_long",
-                    key: "billing",
-                    screen: "billing",
-                    color: "#1a6936",
-                    bg: "#b7f0cd",
-                  },
-                  {
-                    icon: "notifications_active",
-                    key: "alerts",
-                    screen: "alerts",
-                    color: "#7c5800",
-                    bg: "#ffdea3",
-                  },
-                ] as const
-              ).map((a) => (
+              {([
+                {
+                  icon: "water_drop",
+                  key: "services",
+                  screen: "services",
+                  color: "#002045",
+                  bg: "#e8f1ff",
+                },
+                {
+                  icon: "schedule",
+                  key: "supply",
+                  screen: "supply-status",
+                  color: "#1a6936",
+                  bg: "#b7f0cd",
+                },
+                {
+                  icon: "plumbing",
+                  key: "report",
+                  screen: "report",
+                  color: "#ba1a1a",
+                  bg: "#ffdad6",
+                },
+                {
+                  icon: "assignment",
+                  key: "complaints",
+                  screen: "complaints",
+                  color: "#0061a5",
+                  bg: "#e8f1ff",
+                },
+                {
+                  icon: "receipt_long",
+                  key: "billing",
+                  screen: "billing",
+                  color: "#1a6936",
+                  bg: "#b7f0cd",
+                },
+                {
+                  icon: "notifications_active",
+                  key: "alerts",
+                  screen: "alerts",
+                  color: "#7c5800",
+                  bg: "#ffdea3",
+                },
+              ] as const).map((a) => (
                 <button
                   key={a.screen}
                   onClick={() => onNavigate(a.screen)}
@@ -244,7 +250,9 @@ export default function HomePage() {
                 10 Sep 2026
               </span>
             </div>
-            {supplyLoading && <LoadingSpinner message={t.home.loadingSchedule} />}
+            {supplyLoading && (
+              <LoadingSpinner message={t.home.loadingSchedule} />
+            )}
             {!supplyLoading && !supplyError && schedules.length === 0 && (
               <div className="text-xs text-[#8a909c] text-center py-2">
                 {t.home.noSchedule}
@@ -295,7 +303,9 @@ export default function HomePage() {
               <span className="font-bold text-[#002045] text-sm">
                 {t.home.usageTitle}
               </span>
-              <span className="ml-auto text-xs text-[#8a909c]">{t.home.litres}</span>
+              <span className="ml-auto text-xs text-[#8a909c]">
+                {t.home.litres}
+              </span>
             </div>
             <div className="text-xs text-[#8a909c] mb-4">
               {t.home.quotaLine}{" "}
@@ -335,11 +345,15 @@ export default function HomePage() {
                 <div className="flex items-center gap-4 mt-3">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-sm bg-[#0061a5]" />
-                    <span className="text-xs text-[#4a5060]">{t.home.currentMonth}</span>
+                    <span className="text-xs text-[#4a5060]">
+                      {t.home.currentMonth}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-sm bg-[#c8cdd6]" />
-                    <span className="text-xs text-[#4a5060]">{t.home.previous}</span>
+                    <span className="text-xs text-[#4a5060]">
+                      {t.home.previous}
+                    </span>
                   </div>
                 </div>
               </>

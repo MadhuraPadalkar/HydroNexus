@@ -101,10 +101,7 @@ export default function TankerRequestPage() {
             </div>
           </div>
 
-          <button
-            className="btn-primary"
-            onClick={() => onNavigate("home")}
-          >
+          <button className="btn-primary" onClick={() => onNavigate("home")}>
             {t.tanker.returnHome}
           </button>
         </div>

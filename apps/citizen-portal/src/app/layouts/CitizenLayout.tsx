@@ -162,7 +162,9 @@ export default function CitizenLayout() {
                     className={active ? "text-[#002045]" : "text-[#8a909c]"}
                     filled={active}
                   />
-                  <span className="text-sm">{t.layout.menu[item.labelKey]}</span>
+                  <span className="text-sm">
+                    {t.layout.menu[item.labelKey]}
+                  </span>
                 </button>
               )
             })}
@@ -196,9 +198,7 @@ export default function CitizenLayout() {
               style={{ border: "none" }}
             >
               <Icon name="logout" size={22} />
-              <span className="text-sm font-semibold">
-                {t.layout.signOut}
-              </span>
+              <span className="text-sm font-semibold">{t.layout.signOut}</span>
             </button>
           </div>
         </div>

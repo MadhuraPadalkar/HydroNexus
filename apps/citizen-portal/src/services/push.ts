@@ -1,8 +1,8 @@
-import { Capacitor } from "@capacitor/core";
-import { PushNotifications } from "@capacitor/push-notifications";
-import { explainDenial, explainWhy } from "./permissions";
+import { Capacitor } from "@capacitor/core"
+import { PushNotifications } from "@capacitor/push-notifications"
+import { explainDenial, explainWhy } from "./permissions"
 
-let initialized = false;
+let initialized = false
 
 /**
  * Register for push notifications and log the FCM token.
@@ -14,60 +14,60 @@ let initialized = false;
  * - Assumes google-services.json is added manually into android/app/.
  */
 export async function initPushNotifications(): Promise<void> {
-  if (initialized) return;
-  initialized = true;
+  if (initialized) return
+  initialized = true
 
   if (import.meta.env.VITE_ENABLE_PUSH !== "true") {
-    console.log("[push] push notifications disabled (VITE_ENABLE_PUSH!=true)");
-    return;
+    console.log("[push] push notifications disabled (VITE_ENABLE_PUSH!=true)")
+    return
   }
 
   try {
     if (!Capacitor.isNativePlatform()) {
-      console.log("[push] push notifications skipped (not a native platform)");
-      return;
+      console.log("[push] push notifications skipped (not a native platform)")
+      return
     }
 
     if (!explainWhy("notifications")) {
-      explainDenial("notifications");
-      return;
+      explainDenial("notifications")
+      return
     }
 
-    let status = await PushNotifications.checkPermissions();
+    let status = await PushNotifications.checkPermissions()
     if (status.receive !== "granted") {
-      status = await PushNotifications.requestPermissions();
+      status = await PushNotifications.requestPermissions()
     }
     if (status.receive !== "granted") {
-      explainDenial("notifications");
-      return;
+      explainDenial("notifications")
+      return
     }
 
     try {
-      await PushNotifications.register();
+      await PushNotifications.register()
     } catch (err) {
-      console.warn("[push] register() failed:", err);
-      return;
+      console.warn("[push] register() failed:", err)
+      return
     }
 
     await PushNotifications.addListener("registration", (token) => {
-      console.log("[push] registration token:", token.value);
-    });
+      console.log("[push] registration token:", token.value)
+    })
     await PushNotifications.addListener("registrationError", (err) => {
-      console.warn("[push] registration error:", err.error);
-    });
+      console.warn("[push] registration error:", err.error)
+    })
     await PushNotifications.addListener(
       "pushNotificationReceived",
       (notification) => {
-        console.log("[push] notification received:", notification);
+        console.log("[push] notification received:", notification)
       },
-    );
+    )
     await PushNotifications.addListener(
       "pushNotificationActionPerformed",
       (action) => {
-        console.log("[push] notification action:", action);
+        console.log("[push] notification action:", action)
       },
-    );
+    )
   } catch (err) {
-    console.warn("[push] push notifications unavailable:", err);
+    console.warn("[push] push notifications unavailable:", err)
   }
 }

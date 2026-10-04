@@ -30,9 +30,7 @@ export function useCitizenComplaints() {
       const res = await complaintsApi.getComplaints()
       setComplaints(res.data)
     } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : t.errors.complaints,
-      )
+      setError(err instanceof Error ? err.message : t.errors.complaints)
     } finally {
       setLoading(false)
     }
@@ -73,9 +71,7 @@ export function useCitizenSupply() {
       setSchedules(sRes.data)
       setOutages(oRes.data)
     } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : t.errors.supply,
-      )
+      setError(err instanceof Error ? err.message : t.errors.supply)
     } finally {
       setLoading(false)
     }
@@ -213,9 +209,7 @@ export function useComplaintDetail(id: string | undefined) {
       const res = await complaintsApi.getComplaintById(id)
       setComplaint(res.data)
     } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : t.errors.complaint,
-      )
+      setError(err instanceof Error ? err.message : t.errors.complaint)
     } finally {
       setLoading(false)
     }

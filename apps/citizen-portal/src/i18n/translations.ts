@@ -118,7 +118,8 @@ const en = {
     sectionsFailed: "Some sections failed to load",
     emergencyOutage: "Emergency Outage",
     tankersDeployed: "Tankers deployed.",
-    quickActions: "Quick Actions",actions: {
+    quickActions: "Quick Actions",
+    actions: {
       services: "Water Services",
       supply: "Supply Status",
       report: "Report an Issue",
@@ -321,7 +322,8 @@ const en = {
   tanker: {
     requestedTitle: "Tanker Requested",
     successTitle: "Request Submitted",
-    successBody: "Your request for a water tanker (Req ID: {id}) has been received.",
+    successBody:
+      "Your request for a water tanker (Req ID: {id}) has been received.",
     tracking: "Status Tracking",
     steps: {
       requested: "Requested",
@@ -492,8 +494,7 @@ const mr: AppStrings = {
     invalidPhone: "कृपया बरोबर १० अंकी मोबाईल नंबर टाका.",
     sendFailed: "OTP पाठवता आला नाही. पुन्हा प्रयत्न करा.",
     mobileNumber: "मोबाईल नंबर",
-    otpInfo:
-      "पडताळणीसाठी या नंबरवर OTP पाठवला जाईल. नेहमीप्रमाणे SMS शुल्क लागू शकते.",
+    otpInfo: "पडताळणीसाठी या नंबरवर OTP पाठवला जाईल. नेहमीप्रमाणे SMS शुल्क लागू शकते.",
     sendOtp: "OTP पाठवा",
     newUser: "नवीन वापरकर्ता?",
     register: "तुमची जोडणी नोंदवा",
@@ -595,12 +596,10 @@ const mr: AppStrings = {
     submit: "तक्रार पाठवा",
     photoSkipped: "फोटो वगळला — तरीही तुम्ही तक्रार पाठवू शकता.",
     photoDenied: "कॅमेरा परवानगी नाकारली — फोटोविना पुढे जात आहोत.",
-    photoFailed:
-      "सध्या कॅमेरा उघडता आला नाही — फोटोविना तक्रार पाठवता येईल.",
+    photoFailed: "सध्या कॅमेरा उघडता आला नाही — फोटोविना तक्रार पाठवता येईल.",
     locSkipped: "ठिकाण वगळले — तरीही तुम्ही तक्रार पाठवू शकता.",
     locDenied: "ठिकाण परवानगी नाकारली — ठिकाणाविना पुढे जात आहोत.",
-    locFailed:
-      "सध्या तुमचे ठिकाण मिळाले नाही — ठिकाणाविना तक्रार पाठवता येईल.",
+    locFailed: "सध्या तुमचे ठिकाण मिळाले नाही — ठिकाणाविना तक्रार पाठवता येईल.",
   },
   complaints: {
     title: "माझ्या तक्रारी",
@@ -669,8 +668,7 @@ const mr: AppStrings = {
     photo: "जोडलेला फोटो",
     timeline: "स्थिती टप्पे",
     communication: "संवाद",
-    noMessages:
-      "अजून संदेश नाहीत. तक्रार सोपवल्यावर आमची टीम इथे उत्तर देईल.",
+    noMessages: "अजून संदेश नाहीत. तक्रार सोपवल्यावर आमची टीम इथे उत्तर देईल.",
     typeMessage: "संदेश लिहा...",
     filedOn: "नोंदणी तारीख",
     rateTitle: "निराकरणाला गुण द्या",

@@ -5,22 +5,22 @@
 // the app keeps working (no blocking, no crash).
 // Messages follow the app language (English / Marathi).
 
-import { LANG_STORAGE_KEY, type Lang } from "@/i18n/translations";
+import { LANG_STORAGE_KEY, type Lang } from "@/i18n/translations"
 
-export type PermissionKind = "camera" | "location" | "notifications";
+export type PermissionKind = "camera" | "location" | "notifications"
 
 function currentLang(): Lang {
   try {
-    return localStorage.getItem(LANG_STORAGE_KEY) === "mr" ? "mr" : "en";
+    return localStorage.getItem(LANG_STORAGE_KEY) === "mr" ? "mr" : "en"
   } catch {
-    return "en";
+    return "en"
   }
 }
 
 const CONTINUE: Record<Lang, string> = {
   en: "Continue?",
   mr: "पुढे जायचे?",
-};
+}
 
 export const PERMISSION_REASONS: Record<PermissionKind, Record<Lang, string>> =
   {
@@ -36,7 +36,7 @@ export const PERMISSION_REASONS: Record<PermissionKind, Record<Lang, string>> =
       en: "We need notification permission so we can send you complaint-status and water-supply alerts.",
       mr: "तक्रारीची स्थिती आणि पाणीपुरवठा सूचना पाठवण्यासाठी आम्हाला सूचना परवानगी हवी आहे.",
     },
-  };
+  }
 
 const DENIED_MESSAGES: Record<PermissionKind, Record<Lang, string>> = {
   camera: {
@@ -51,17 +51,17 @@ const DENIED_MESSAGES: Record<PermissionKind, Record<Lang, string>> = {
     en: "No problem — you can still use the app normally; you just won't get complaint and supply alerts. You can enable notifications later in system settings.",
     mr: "हरकत नाही — अ‍ॅप नेहमीप्रमाणे वापरता येईल; फक्त तक्रार व पुरवठा सूचना मिळणार नाहीत. नंतर सेटिंग्जमध्ये सूचना चालू करता येतील.",
   },
-};
+}
 
 /** Show the "why we need it" message. Returns true when the user agrees to continue. */
 export function explainWhy(kind: PermissionKind): boolean {
-  const lang = currentLang();
+  const lang = currentLang()
   return window.confirm(
     `${PERMISSION_REASONS[kind][lang]}\n\n${CONTINUE[lang]}`,
-  );
+  )
 }
 
 /** Show a friendly message when the user denies a permission. App keeps working. */
 export function explainDenial(kind: PermissionKind): void {
-  window.alert(DENIED_MESSAGES[kind][currentLang()]);
+  window.alert(DENIED_MESSAGES[kind][currentLang()])
 }
