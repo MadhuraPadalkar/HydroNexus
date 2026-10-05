@@ -85,6 +85,11 @@ export const notificationRepository = {
     return [...db.notices]
   },
 
+  /** Officer-side alias used by routes/notifications.officer.ts */
+  listNotices(): Notice[] {
+    return [...db.notices]
+  },
+
   wardAverage(ward: string) {
     return db.wardAverages.find((w) => w.ward === ward)
   },
