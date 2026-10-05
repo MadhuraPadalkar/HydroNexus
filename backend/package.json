@@ -1,21 +1,4 @@
 {
-<<<<<<< HEAD
-  "name": "hydronexus-officer-backend",
-  "version": "1.0.0",
-  "private": true,
-  "description": "HydroNexus officer-facing backend (Node.js + Express + TypeScript). Repository layer over a temporary in-memory store; swap repositories for Person 4's Prisma/Postgres client without touching routes.",
-  "type": "commonjs",
-  "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/src/index.js",
-    "build": "tsc -p tsconfig.json",
-    "verify": "tsx tests/verify.ts",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@water/types": "file:../packages/types",
-    "bcryptjs": "^2.4.3",
-=======
   "name": "hydronexus-backend",
   "version": "1.0.0",
   "private": true,
@@ -29,7 +12,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
->>>>>>> main
+    "@water/types": "file:../packages/types",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
@@ -37,7 +21,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-<<<<<<< HEAD
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.23",
@@ -45,13 +28,5 @@
     "@types/node": "^22.10.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
-=======
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/jsonwebtoken": "^9.0.9",
-    "@types/node": "^22.7.0",
-    "tsx": "^4.19.1",
-    "typescript": "^5.7.0"
->>>>>>> main
   }
 }
