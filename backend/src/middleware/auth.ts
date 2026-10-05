@@ -1,78 +1,22 @@
-<<<<<<< HEAD
-// JWT auth + officer/admin role guard.
-import type { NextFunction, Request, RequestHandler, Response } from "express";
-import jwt from "jsonwebtoken";
-import { config } from "../config";
-import type { AuthedRequest, JwtPayload, OfficerRole } from "../domain";
-import { forbidden, unauthorized } from "../utils/respond";
+// JWT auth + role guard.
+// Sets BOTH req.user and req.auth (same payload) so existing route files
+// from either side of the merge keep working regardless of which
+// property name they reference. Clean this up to one name after Thursday.
 
-export const OFFICER_ROLES: OfficerRole[] = ["Admin", "Engineer", "Supervisor", "Operator"];
-
-function hasOfficerRole(role: string): role is OfficerRole {
-  return (OFFICER_ROLES as string[]).includes(role);
-}
-
-function attachUser(req: Request, payload: JwtPayload): void {
-  (req as AuthedRequest).user = payload;
-}
-
-/** Any valid token (officer OR citizen role). Used for citizen-visible reads. */
-export function requireToken(req: Request, res: Response, next: NextFunction): void {
-  const header = req.headers.authorization || "";
-  const [scheme, token] = header.split(" ");
-  if (scheme !== "Bearer" || !token) {
-    unauthorized(res, "Authentication token missing");
-    return;
-  }
-  try {
-    attachUser(req, jwt.verify(token, config.jwtSecret) as JwtPayload);
-    next();
-  } catch {
-    unauthorized(res, "Authentication token invalid or expired");
-  }
-}
-
-export function requireOfficer(req: Request, res: Response, next: NextFunction): void {
-  const header = req.headers.authorization || "";
-  const [scheme, token] = header.split(" ");
-  if (scheme !== "Bearer" || !token) {
-    unauthorized(res, "Authentication token missing");
-    return;
-  }
-  try {
-    const payload = jwt.verify(token, config.jwtSecret) as JwtPayload;
-    if (!hasOfficerRole(payload.role)) {
-      forbidden(res, "Officer role required");
-      return;
-    }
-    (req as AuthedRequest).user = payload;
-    next();
-  } catch {
-    unauthorized(res, "Authentication token invalid or expired");
-  }
-}
-
-export function requireRoles(...roles: OfficerRole[]): RequestHandler {
-  return (req: Request, res: Response, next: NextFunction) => {
-    requireOfficer(req, res, () => {
-      const user = (req as AuthedRequest).user;
-      if (!roles.includes(user.role as OfficerRole)) {
-        forbidden(res, `Requires one of roles: ${roles.join(", ")}`);
-        return;
-      }
-      next();
-    });
-  };
-=======
-import type { NextFunction, Request, Response } from "express"
+import type { NextFunction, Request, RequestHandler, Response } from "express"
 import jwt from "jsonwebtoken"
 import type { UserSession } from "../../../packages/types/src/index"
 import { env } from "../config/env"
 
-/** Roles come straight from @water/types — never re-listed here. */
 export type Role = UserSession["user"]["role"]
 
-export interface JwtClaims {
+export const OFFICER_ROLES: Role[] = ["Admin", "Engineer", "Supervisor", "Operator"]
+
+function hasOfficerRole(role: string): role is Role {
+  return (OFFICER_ROLES as string[]).includes(role)
+}
+
+export interface JwtPayload {
   sub: string
   role: Role
   phone?: string
@@ -82,92 +26,90 @@ export interface JwtClaims {
 }
 
 export interface AuthedRequest extends Request {
-  auth?: JwtClaims
+  user?: JwtPayload
+  auth?: JwtPayload
 }
 
-export function signAccessToken(claims: Omit<JwtClaims, "type">): string {
+function unauthorized(res: Response, message: string): void {
+  res.status(401).json({
+    success: false,
+    error: { message, code: "AUTH_UNAUTHORIZED", status: 401 },
+  })
+}
+
+function forbidden(res: Response, message: string): void {
+  res.status(403).json({
+    success: false,
+    error: { message, code: "AUTH_FORBIDDEN", status: 403 },
+  })
+}
+
+function attachUser(req: Request, payload: JwtPayload): void {
+  ;(req as AuthedRequest).user = payload
+  ;(req as AuthedRequest).auth = payload
+}
+
+export function signAccessToken(claims: Omit<JwtPayload, "type">): string {
   return jwt.sign({ ...claims, type: "access" }, env.jwtSecret, {
     expiresIn: env.jwtExpiresIn,
   } as jwt.SignOptions)
 }
 
-export function signRefreshToken(
-  claims: Pick<JwtClaims, "sub" | "role">,
-): string {
+export function signRefreshToken(claims: Pick<JwtPayload, "sub" | "role">): string {
   return jwt.sign({ ...claims, type: "refresh" }, env.jwtSecret, {
     expiresIn: env.refreshExpiresIn,
   } as jwt.SignOptions)
 }
 
-export function authenticate(
-  req: AuthedRequest,
-  res: Response,
-  next: NextFunction,
-): void {
-  const header = req.headers.authorization
-  if (!header || !header.startsWith("Bearer ")) {
-    res.status(401).json({
-      success: false,
-      error: {
-        message: "Authentication token missing",
-        code: "AUTH_UNAUTHORIZED",
-        status: 401,
-      },
-    })
+/** Any valid, non-refresh token (officer OR citizen role). */
+export function requireToken(req: Request, res: Response, next: NextFunction): void {
+  const header = req.headers.authorization || ""
+  const [scheme, token] = header.split(" ")
+  if (scheme !== "Bearer" || !token) {
+    unauthorized(res, "Authentication token missing")
     return
   }
   try {
-    const payload = jwt.verify(header.slice(7), env.jwtSecret) as JwtClaims
+    const payload = jwt.verify(token, env.jwtSecret) as JwtPayload
     if (payload.type === "refresh") {
-      res.status(401).json({
-        success: false,
-        error: {
-          message: "Refresh token cannot access resources",
-          code: "AUTH_UNAUTHORIZED",
-          status: 401,
-        },
-      })
+      unauthorized(res, "Refresh token cannot access resources")
       return
     }
-    req.auth = payload
+    attachUser(req, payload)
     next()
   } catch {
-    res.status(401).json({
-      success: false,
-      error: {
-        message: "Invalid or expired token",
-        code: "AUTH_UNAUTHORIZED",
-        status: 401,
-      },
+    unauthorized(res, "Authentication token invalid or expired")
+  }
+}
+
+/** Alias — same behavior as requireToken. */
+export const authenticate = requireToken
+
+/** Requires any officer-side role (Admin/Engineer/Supervisor/Operator). */
+export function requireOfficer(req: Request, res: Response, next: NextFunction): void {
+  requireToken(req, res, () => {
+    const user = (req as AuthedRequest).user
+    if (!user || !hasOfficerRole(user.role)) {
+      forbidden(res, "Officer role required")
+      return
+    }
+    next()
+  })
+}
+
+/** Requires one of the specific roles passed in. */
+export function requireRole(...roles: Role[]): RequestHandler {
+  return (req: Request, res: Response, next: NextFunction) => {
+    requireToken(req, res, () => {
+      const user = (req as AuthedRequest).user
+      if (!user || !roles.includes(user.role)) {
+        forbidden(res, `Requires one of roles: ${roles.join(", ")}`)
+        return
+      }
+      next()
     })
   }
 }
 
-export function requireRole(...roles: Role[]) {
-  return (req: AuthedRequest, res: Response, next: NextFunction): void => {
-    if (!req.auth) {
-      res.status(401).json({
-        success: false,
-        error: {
-          message: "Authentication required",
-          code: "AUTH_UNAUTHORIZED",
-          status: 401,
-        },
-      })
-      return
-    }
-    if (!roles.includes(req.auth.role)) {
-      res.status(403).json({
-        success: false,
-        error: {
-          message: "Insufficient permissions",
-          code: "AUTH_FORBIDDEN",
-          status: 403,
-        },
-      })
-      return
-    }
-    next()
-  }
->>>>>>> main
-}
+/** Alias — same behavior as requireRole. */
+export const requireRoles = requireRole
