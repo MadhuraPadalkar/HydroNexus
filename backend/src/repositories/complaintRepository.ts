@@ -29,12 +29,12 @@ const ALLOWED_TRANSITIONS: Record<string, ComplaintStatus[]> = {
 }
 
 export interface ComplaintFilters {
-  filter?: string
-  status?: string
-  type?: string
-  ward?: string
-  category?: string
-  citizenName?: string
+  filter?: string | undefined
+  status?: string | undefined
+  type?: string | undefined
+  ward?: string | undefined
+  category?: string | undefined
+  citizenName?: string | undefined
 }
 
 export interface CreateComplaintInput {
@@ -98,6 +98,11 @@ export const complaintRepository = {
       items = items.filter((c) => c.citizen === filters.citizenName)
     }
     return items
+  },
+
+  /** Citizen-side alias used by api/routes/complaints.ts */
+  list(filters: ComplaintFilters = {}): Complaint[] {
+    return complaintRepository.findAll(filters)
   },
 
   findById(id: string): Complaint | undefined {
