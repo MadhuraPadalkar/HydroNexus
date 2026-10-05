@@ -10,7 +10,12 @@ import { env } from "../config/env"
 
 export type Role = UserSession["user"]["role"]
 
-export const OFFICER_ROLES: Role[] = ["Admin", "Engineer", "Supervisor", "Operator"]
+export const OFFICER_ROLES: Role[] = [
+  "Admin",
+  "Engineer",
+  "Supervisor",
+  "Operator",
+]
 
 function hasOfficerRole(role: string): role is Role {
   return (OFFICER_ROLES as string[]).includes(role)
@@ -55,14 +60,20 @@ export function signAccessToken(claims: Omit<JwtPayload, "type">): string {
   } as jwt.SignOptions)
 }
 
-export function signRefreshToken(claims: Pick<JwtPayload, "sub" | "role">): string {
+export function signRefreshToken(
+  claims: Pick<JwtPayload, "sub" | "role">,
+): string {
   return jwt.sign({ ...claims, type: "refresh" }, env.jwtSecret, {
     expiresIn: env.refreshExpiresIn,
   } as jwt.SignOptions)
 }
 
 /** Any valid, non-refresh token (officer OR citizen role). */
-export function requireToken(req: Request, res: Response, next: NextFunction): void {
+export function requireToken(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
   const header = req.headers.authorization || ""
   const [scheme, token] = header.split(" ")
   if (scheme !== "Bearer" || !token) {
@@ -86,7 +97,11 @@ export function requireToken(req: Request, res: Response, next: NextFunction): v
 export const authenticate = requireToken
 
 /** Requires any officer-side role (Admin/Engineer/Supervisor/Operator). */
-export function requireOfficer(req: Request, res: Response, next: NextFunction): void {
+export function requireOfficer(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
   requireToken(req, res, () => {
     const user = (req as AuthedRequest).user
     if (!user || !hasOfficerRole(user.role)) {

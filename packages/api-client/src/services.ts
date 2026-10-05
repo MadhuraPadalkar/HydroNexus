@@ -411,12 +411,7 @@ export const citizensApi = {
 
   async updateServiceRequest(
     id: string,
-    patch: Partial<
-      Pick<
-        ServiceRequest,
-        "status" | "vehicleNumber" | "driverName" | "notes"
-      >
-    >,
+    patch: Partial<Pick<ServiceRequest, "status" | "vehicleNumber" | "driverName" | "notes">>,
   ): Promise<ApiResponse<ServiceRequest>> {
     if (isMock()) {
       await delay()
@@ -610,8 +605,10 @@ const mockWorkOrders: WorkOrder[] = mockMaintenanceTasks.map((t, i) => ({
   priority: t.priority,
   assignedTeam: t.assignedTeam,
   complaintId: undefined,
-  assignedTo: undefined,
-  notes: t.notes,
+  assignedTo: "",
+  notes: t.notes ?? "",
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 }))
 
 export const workOrdersApi = {
@@ -646,8 +643,10 @@ export const workOrdersApi = {
         priority: payload.priority || "Medium",
         assignedTeam: payload.assignedTeam || "Unassigned",
         complaintId: payload.complaintId,
-        assignedTo: payload.assignedTo,
-        notes: payload.notes,
+        assignedTo: payload.assignedTo ?? "",
+        notes: payload.notes ?? "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }
       mockWorkOrders.unshift(wo)
       return { success: true, data: wo }
