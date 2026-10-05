@@ -604,7 +604,11 @@ const mockWorkOrders: WorkOrder[] = mockMaintenanceTasks.map((t, i) => ({
         : t.status,
   priority: t.priority,
   assignedTeam: t.assignedTeam,
-  notes: t.notes,
+  complaintId: undefined,
+  assignedTo: "",
+  notes: t.notes ?? "",
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 }))
 
 export const workOrdersApi = {
@@ -639,8 +643,10 @@ export const workOrdersApi = {
         priority: payload.priority || "Medium",
         assignedTeam: payload.assignedTeam || "Unassigned",
         complaintId: payload.complaintId,
-        assignedTo: payload.assignedTo,
-        notes: payload.notes,
+        assignedTo: payload.assignedTo ?? "",
+        notes: payload.notes ?? "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }
       mockWorkOrders.unshift(wo)
       return { success: true, data: wo }

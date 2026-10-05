@@ -67,18 +67,22 @@ export interface Complaint {
 }
 
 // Work Orders (field tasks linked to complaints / maintenance)
+// Merged: officer-backend fields are required, fields from the older
+// definition (type, scheduledDate, assignedTeam) are optional.
 export interface WorkOrder {
   id: string
   complaintId?: string
   title: string
-  type: "Preventive" | "Corrective" | "Inspection"
+  type?: "Preventive" | "Corrective" | "Inspection"
   ward: string
-  scheduledDate: string
-  status: "Pending" | "Assigned" | "In Progress" | "Completed" | "Cancelled"
+  scheduledDate?: string
+  status: "Open" | "Pending" | "Assigned" | "In Progress" | "On Hold" | "Completed" | "Cancelled"
   priority: "Low" | "Medium" | "High" | "Critical"
-  assignedTeam: string
-  assignedTo?: string
-  notes?: string
+  assignedTeam?: string
+  assignedTo: string
+  createdAt: string
+  updatedAt: string
+  notes: string
 }
 
 // Supply & Outages
@@ -277,4 +281,17 @@ export interface AuditLog {
   ip: string
   time: string
   severity: "Info" | "Warning" | "Critical"
+}
+
+// Officer operations (added for the officer-facing backend; no existing
+// interface was modified).
+export interface Ward {
+  id: string
+  name: string
+  zone: string
+  population: number
+  households: number
+  coveragePct: number
+  supplyHours: string
+  status: "Normal" | "Watch" | "Disrupted"
 }

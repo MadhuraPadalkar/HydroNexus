@@ -495,7 +495,9 @@ export function normalizeWorkOrder(r: AnyRecord): WorkOrder {
       "Medium",
     ),
     assignedTeam: str(r.assignedTeam ?? r.assigned_team),
-    assignedTo: str(r.assignedTo ?? r.assigned_to) || undefined,
-    notes: str(r.notes) || undefined,
+    assignedTo: str(r.assignedTo ?? r.assigned_to), // required by merged WorkOrder type
+    createdAt: str(r.createdAt ?? r.created_at), // required by merged WorkOrder type
+    updatedAt: str(r.updatedAt ?? r.updated_at), // required by merged WorkOrder type
+    notes: str(r.notes), // required by merged WorkOrder type
   }
 }

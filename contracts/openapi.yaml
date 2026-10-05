@@ -23,7 +23,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: [email]
+              required: [email, password]
               properties:
                 email:
                   type: string
@@ -153,9 +153,44 @@ paths:
                     $ref: '#/components/schemas/Complaint'
 
   /complaints/{id}:
+    get:
+      summary: Get complaint detail (officer)
+      description: >
+        Officer-only complaint detail view. Roles: any officer role.
+        Query shape and status vocabulary match packages/types Complaint.
+      tags: [Complaints]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Complaint detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/Complaint'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Citizen tokens and other non-officer roles are rejected
+        '404':
+          description: Unknown complaint id
     patch:
       summary: Update complaint
-      description: Updates status, priority, or field assignment of a complaint.
+      description: >
+        Updates status, priority, or field assignment of a complaint.
+        Roles: Admin, Supervisor, Engineer. KNOWN DRIFT: besides the
+        packages/types statuses (Open, In Progress, Resolved) the endpoint
+        also accepts Pending (stored as Open) and Escalated, matching the
+        citizen-side vocabulary in openapi.yaml. See "Known drift" note.
       tags: [Complaints]
       security:
         - BearerAuth: []
@@ -173,7 +208,7 @@ paths:
               properties:
                 status:
                   type: string
-                  enum: [Pending, In Progress, Resolved, Escalated]
+                  enum: [Open, Pending, In Progress, Resolved, Escalated]
                 priority:
                   type: string
                   enum: [Low, Medium, High, Critical]
@@ -190,6 +225,110 @@ paths:
                   success: { type: boolean, example: true }
                   data:
                     $ref: '#/components/schemas/Complaint'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks complaint-write permission
+        '404':
+          description: Unknown complaint id
+        '422':
+          description: Validation failed (unknown enum, empty patch)
+
+  /complaints/{id}/status:
+    patch:
+      summary: Update complaint status (api-client alias)
+      description: >
+        Alias used by @water/api-client updateStatus. Identical service and
+        audit trail as PATCH /complaints/{id}. Roles: Admin, Supervisor,
+        Engineer.
+      tags: [Complaints]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [Open, Pending, In Progress, Resolved, Escalated]
+      responses:
+        '200':
+          description: Complaint status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/Complaint'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks complaint-write permission
+        '404':
+          description: Unknown complaint id
+        '422':
+          description: Unknown status value
+
+  /complaints/{id}/assign:
+    post:
+      summary: Assign complaint to ward engineer (officer)
+      description: >
+        Assigns a complaint to an engineer and creates (or links) a work
+        order. Roles: Admin, Supervisor.
+      tags: [Complaints]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [engineer]
+              properties:
+                engineer: { type: string, example: 'Anil Jadhav' }
+                workOrderId: { type: string }
+                notes: { type: string }
+      responses:
+        '200':
+          description: Complaint assigned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: object
+                    properties:
+                      complaint:
+                        $ref: '#/components/schemas/Complaint'
+                      workOrder:
+                        $ref: '#/components/schemas/WorkOrder'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks assign permission
+        '404':
+          description: Unknown complaint id
+        '422':
+          description: Missing engineer
 
   /work-orders:
     get:
@@ -298,6 +437,35 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/SupplyScheduleItem'
+    put:
+      summary: Upsert ward supply schedule row (officer)
+      description: 'Roles: Admin, Supervisor, Engineer.'
+      tags: [Supply]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplyScheduleItem'
+      responses:
+        '200':
+          description: Schedule row saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/SupplyScheduleItem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks supply-write permission
+        '422':
+          description: Validation failed
 
   /supply/outages:
     get:
@@ -318,7 +486,8 @@ paths:
                     items:
                       $ref: '#/components/schemas/Outage'
     post:
-      summary: Create outage notice
+      summary: Create outage notice (officer)
+      description: 'Roles: Admin, Supervisor, Engineer. autoNotify writes a citizen-visible alert. Dates must parse with end after start (422 otherwise).'
       tags: [Supply]
       security:
         - BearerAuth: []
@@ -327,17 +496,41 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewOutageRequest'
+              type: object
+              required: [ward, zone, reason, type, startTime, estimatedRestoration]
+              properties:
+                ward: { type: string }
+                zone: { type: string }
+                reason: { type: string }
+                type: { type: string, enum: [Emergency, Scheduled] }
+                startTime: { type: string, example: '12 Sep 2026, 06:00 AM' }
+                estimatedRestoration: { type: string, example: '12 Sep 2026, 02:00 PM' }
+                status: { type: string, enum: [Active, Scheduled, Resolved] }
+                affectedPopulation: { type: integer }
+                tankersDispatched: { type: integer }
+                autoNotify: { type: boolean }
       responses:
         '201':
+          description: Outage created
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  success: { type: boolean }
+                  success: { type: boolean, example: true }
                   data:
-                    $ref: '#/components/schemas/Outage'
+                    type: object
+                    properties:
+                      outage:
+                        $ref: '#/components/schemas/Outage'
+                      notification:
+                        $ref: '#/components/schemas/Alert'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks supply-write permission
+        '422':
+          description: Validation or date error
 
   /supply/maintenance:
     get:
@@ -358,7 +551,8 @@ paths:
                     items:
                       $ref: '#/components/schemas/MaintenanceTask'
     post:
-      summary: Schedule maintenance task
+      summary: Create maintenance activity (officer)
+      description: 'Roles: Admin, Supervisor, Engineer. scheduledDate must be a parseable date (422 otherwise).'
       tags: [Supply]
       security:
         - BearerAuth: []
@@ -367,90 +561,34 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewMaintenanceRequest'
+              type: object
+              required: [title, type, ward, scheduledDate, assignedTeam]
+              properties:
+                title: { type: string }
+                type: { type: string, enum: [Preventive, Corrective, Inspection] }
+                ward: { type: string }
+                scheduledDate: { type: string, example: '15 Sep 2026' }
+                status: { type: string, enum: [Scheduled, In Progress, Completed, Pending] }
+                priority: { type: string, enum: [Low, Medium, High, Critical] }
+                assignedTeam: { type: string }
+                notes: { type: string }
       responses:
         '201':
+          description: Maintenance activity created
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  success: { type: boolean }
+                  success: { type: boolean, example: true }
                   data:
                     $ref: '#/components/schemas/MaintenanceTask'
-
-  /supply/maintenance/{id}:
-    patch:
-      summary: Update maintenance task status
-      tags: [Supply]
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                status:
-                  type: string
-                  enum: [Scheduled, In Progress, Completed, Pending, Cancelled]
-                assignedTeam:
-                  type: string
-                notes:
-                  type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success: { type: boolean }
-                  data:
-                    $ref: '#/components/schemas/MaintenanceTask'
-
-  /supply/outages/{id}:
-    patch:
-      summary: Update outage notice
-      description: Updates outage status, restoration estimate, or tanker count.
-      tags: [Supply]
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                status:
-                  type: string
-                  enum: [Active, Scheduled, Resolved]
-                estimatedRestoration:
-                  type: string
-                tankersDispatched:
-                  type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success: { type: boolean }
-                  data:
-                    $ref: '#/components/schemas/Outage'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks supply-write permission
+        '422':
+          description: Validation or date error
 
   /nrw/metrics:
     get:
@@ -680,9 +818,16 @@ paths:
   /alerts:
     get:
       summary: Get active emergency notices and advisories
+      description: >
+        Any valid token (officer OR citizen role). Doubles as the
+        notification history/log. Optional ?severity= filter.
       tags: [Alerts]
       security:
         - BearerAuth: []
+      parameters:
+        - name: severity
+          in: query
+          schema: { type: string, enum: [critical, warning, info, success] }
       responses:
         '200':
           content:
@@ -695,8 +840,13 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Alert'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
     post:
       summary: Broadcast emergency water alert to citizens
+      description: >
+        Roles: Admin, Supervisor. Accepts severity or type
+        (Supply/Shortage/Flood/General, mapped to a severity).
       tags: [Alerts]
       security:
         - BearerAuth: []
@@ -716,10 +866,17 @@ paths:
                   success: { type: boolean }
                   data:
                     $ref: '#/components/schemas/Alert'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Engineer, Operator, Citizen rejected
+        '422':
+          description: Missing title/body, or neither severity nor type
 
   /notices:
     get:
       summary: List public circulars and announcements
+      description: Public endpoint — no token required.
       tags: [Alerts]
       responses:
         '200':
@@ -821,6 +978,45 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/OfficerUser'
+    post:
+      summary: Create officer (officer)
+      description: 'Roles: Admin. Seed password Password123!.'
+      tags: [Admin]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, phone, role, department, zone]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                phone: { type: string }
+                role: { type: string, enum: [Admin, Engineer, Supervisor, Operator] }
+                department: { type: string }
+                zone: { type: string }
+      responses:
+        '201':
+          description: Officer created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/OfficerUser'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-Admin role rejected
+        '409':
+          description: Email already exists
+        '422':
+          description: Validation failed
 
   /admin/permissions:
     get:
@@ -857,13 +1053,67 @@ paths:
                   success: { type: boolean }
                   data:
                     $ref: '#/components/schemas/SystemSettingsConfig'
+    put:
+      summary: Update system settings (officer)
+      description: 'Roles: Admin. Partial body; returns full updated settings.'
+      tags: [Admin]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                autoFloodAlert: { type: boolean }
+                floodMinor: { type: string }
+                floodModerate: { type: string }
+                floodMajor: { type: string }
+                nrwWarningThreshold: { type: string }
+                slaCriticalHours: { type: string }
+                slaGeneralHours: { type: string }
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/SystemSettingsConfig'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-Admin role rejected
+        '422':
+          description: Validation failed
 
   /admin/audit-logs:
     get:
       summary: Retrieve system security and action audit trail
+      description: >
+        Roles: Admin, Supervisor. Newest first. Optional filters ?user=
+        (actor substring), ?module= (exact), ?severity= (exact), ?q=
+        (free-text over action/target/actor/module).
       tags: [Admin]
       security:
         - BearerAuth: []
+      parameters:
+        - name: user
+          in: query
+          schema: { type: string }
+        - name: module
+          in: query
+          schema: { type: string }
+        - name: severity
+          in: query
+          schema: { type: string, enum: [Info, Warning, Critical] }
+        - name: q
+          in: query
+          schema: { type: string }
       responses:
         '200':
           content:
@@ -876,6 +1126,826 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/AuditLog'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Operator, Citizen and other roles are rejected
+
+  /work-orders:
+    get:
+      summary: List work orders (officer)
+      description: 'Roles: any officer role. Filters ?status= ?ward= ?assignee=.'
+      tags: [Complaints]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Work order list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WorkOrder'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+    post:
+      summary: Create work order (officer)
+      description: 'Roles: Admin, Supervisor, Engineer.'
+      tags: [Complaints]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, ward, assignedTo]
+              properties:
+                complaintId: { type: string }
+                title: { type: string }
+                ward: { type: string }
+                assignedTo: { type: string }
+                priority: { type: string, enum: [Low, Medium, High, Critical] }
+                notes: { type: string }
+      responses:
+        '201':
+          description: Work order created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/WorkOrder'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks work-order write permission
+        '422':
+          description: Validation failed
+
+  /work-orders/{id}:
+    get:
+      summary: Work order detail with linked complaint (officer)
+      description: 'Roles: any officer role.'
+      tags: [Complaints]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Work order detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/WorkOrder'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+        '404':
+          description: Unknown work order id
+    patch:
+      summary: Update work order (officer)
+      description: 'Roles: Admin, Supervisor, Engineer.'
+      tags: [Complaints]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [Open, In Progress, On Hold, Completed, Cancelled] }
+                assignedTo: { type: string }
+                notes: { type: string }
+      responses:
+        '200':
+          description: Work order updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/WorkOrder'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks work-order write permission
+        '404':
+          description: Unknown work order id
+        '422':
+          description: Validation failed
+
+  /supply/outages/{id}:
+    patch:
+      summary: Update outage (officer)
+      description: 'Roles: Admin, Supervisor, Engineer.'
+      tags: [Supply]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [Active, Scheduled, Resolved] }
+                estimatedRestoration: { type: string }
+                tankersDispatched: { type: integer }
+                reason: { type: string }
+      responses:
+        '200':
+          description: Outage updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/Outage'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks supply-write permission
+        '404':
+          description: Unknown outage id
+        '422':
+          description: Validation or date error
+
+  /supply/maintenance/{id}:
+    patch:
+      summary: Update maintenance activity (officer)
+      description: 'Roles: Admin, Supervisor, Engineer.'
+      tags: [Supply]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [Scheduled, In Progress, Completed, Pending] }
+                scheduledDate: { type: string }
+                assignedTeam: { type: string }
+      responses:
+        '200':
+          description: Maintenance activity updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/MaintenanceTask'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks supply-write permission
+        '404':
+          description: Unknown maintenance id
+        '422':
+          description: Validation or date error
+
+  /nrw/summary:
+    get:
+      summary: City-wide NRW summary (computed, officer)
+      description: 'Computed from zone input/billed accounting. Roles: any officer role.'
+      tags: [NRW]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: City NRW summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: object
+                    properties:
+                      inputVolumeKL: { type: number }
+                      billedVolumeKL: { type: number }
+                      nrwVolumeKL: { type: number }
+                      nrwPercentage: { type: number }
+                      zoneCount: { type: integer }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+
+  /nrw/leakage-analysis:
+    get:
+      summary: Leakage analysis with high-risk zones (officer)
+      description: 'Roles: any officer role.'
+      tags: [NRW]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Leakage analysis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/LeakageAnalysis'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+
+  /nrw/compare:
+    post:
+      summary: Multi-ward comparison (officer)
+      description: 'Accepts 2-4 unique ward names. Roles: any officer role. Duplicate wards are rejected with 422.'
+      tags: [NRW]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [wards]
+              properties:
+                wards:
+                  type: array
+                  minItems: 2
+                  maxItems: 4
+                  items: { type: string }
+      responses:
+        '200':
+          description: Ward comparison
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WardComparisonEntry'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+        '404':
+          description: Unknown ward name
+        '422':
+          description: Fewer than 2, more than 4, or duplicate wards
+
+  /nrw/zones/{zone}:
+    put:
+      summary: Update NRW zone volumes (officer)
+      description: 'Updates inputVolumeKL/billedVolumeKL (both >= 0, billed <= input). Derived fields recomputed. Roles: Admin, Supervisor, Engineer.'
+      tags: [NRW]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: zone
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [inputVolumeKL, billedVolumeKL]
+              properties:
+                inputVolumeKL: { type: number }
+                billedVolumeKL: { type: number }
+      responses:
+        '200':
+          description: Zone volumes updated (derived fields recomputed)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/NRWZoneMetric'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks NRW-write permission
+        '404':
+          description: Unknown zone
+        '422':
+          description: billed exceeds input, or negative volumes
+
+  /citizens/{id}:
+    get:
+      summary: Citizen detail (officer)
+      description: 'Lookup by citizen id or consumer number. Roles: any officer role.'
+      tags: [Citizens]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Citizen record
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/CitizenRecord'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+        '404':
+          description: Unknown citizen
+
+  /citizens/applications/{id}:
+    patch:
+      summary: Approve/reject connection application (officer)
+      description: 'Roles: Admin, Supervisor.'
+      tags: [Citizens]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action: { type: string, enum: [approve, reject, inspection] }
+                note: { type: string }
+      responses:
+        '200':
+          description: Application decided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/WaterConnectionApplication'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks approval permission
+        '404':
+          description: Unknown application id
+        '422':
+          description: Unknown action
+
+  /citizens/requests/{id}:
+    patch:
+      summary: Dispatch/update service request (officer)
+      description: 'Officer dispatch half of the tanker queue. Roles: Admin, Supervisor, Operator.'
+      tags: [Citizens]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [Pending, Assigned, En Route, Completed] }
+                vehicleNumber: { type: string }
+                driverName: { type: string }
+                notes: { type: string }
+      responses:
+        '200':
+          description: Service request updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/ServiceRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Role lacks dispatch permission
+        '404':
+          description: Unknown service request id
+        '422':
+          description: Unknown status
+
+  /wards:
+    get:
+      summary: List wards (officer)
+      description: 'Roles: any officer role.'
+      tags: [Citizens]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Ward list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Ward'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+
+  /wards/{id}:
+    get:
+      summary: Ward detail (officer)
+      description: 'Roles: any officer role.'
+      tags: [Citizens]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Ward metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/Ward'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+        '404':
+          description: Unknown ward
+    patch:
+      summary: Update ward metadata (officer)
+      description: 'Roles: Admin.'
+      tags: [Citizens]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                population: { type: integer }
+                households: { type: integer }
+                coveragePct: { type: number }
+                supplyHours: { type: string }
+                status: { type: string, enum: [Normal, Watch, Disrupted] }
+      responses:
+        '200':
+          description: Ward updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/Ward'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-Admin role rejected
+        '404':
+          description: Unknown ward
+        '422':
+          description: Validation failed
+
+  /dashboard/summary:
+    get:
+      summary: Dashboard KPI summary (officer)
+      description: 'Total wards, active complaints, city NRW %, active alerts. Roles: any officer role.'
+      tags: [Dashboard]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: KPI summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/DashboardSummary'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+
+  /dashboard/water-status:
+    get:
+      summary: Overall water status (officer)
+      description: 'Roles: any officer role.'
+      tags: [Dashboard]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Water status roll-up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/WaterStatus'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+
+  /analytics/supply:
+    get:
+      summary: Water supply analytics (officer)
+      description: 'Roles: any officer role.'
+      tags: [Analytics]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Supply trend series
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+
+  /analytics/complaints:
+    get:
+      summary: Complaint analytics (officer)
+      description: 'Roles: any officer role. Optional ?range= (default 6m).'
+      tags: [Analytics]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Complaints by category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+
+  /analytics/nrw:
+    get:
+      summary: NRW analytics (officer)
+      description: 'Roles: any officer role.'
+      tags: [Analytics]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: NRW trend series
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+
+  /analytics/consumption:
+    get:
+      summary: Consumption analytics (officer)
+      description: 'Roles: any officer role.'
+      tags: [Analytics]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Consumption by sector plus usage series
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+
+  /analytics/ward-comparison:
+    get:
+      summary: Ward comparison analytics (officer)
+      description: 'Roles: any officer role. ?wards=A,B (defaults to 4 wards).'
+      tags: [Analytics]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Per-ward stats with composite score
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WardComparisonEntry'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-officer role rejected
+        '404':
+          description: Unknown ward name
+
+  /admin/officers/{id}:
+    patch:
+      summary: Update officer (officer)
+      description: 'Roles: Admin. Self-deactivation is rejected with 403.'
+      tags: [Admin]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role: { type: string, enum: [Admin, Engineer, Supervisor, Operator] }
+                department: { type: string }
+                zone: { type: string }
+                status: { type: string, enum: [Active, Inactive] }
+      responses:
+        '200':
+          description: Officer updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/OfficerUser'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-Admin role, or self-deactivation attempt
+        '404':
+          description: Unknown officer id
+        '422':
+          description: Validation failed
+
+  /admin/permissions/{role}:
+    put:
+      summary: Replace role permission matrix (officer)
+      description: 'Roles: Admin. 404 for unknown roles.'
+      tags: [Admin]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: role
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RolePermissions'
+      responses:
+        '200':
+          description: Permissions replaced
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:
+                    $ref: '#/components/schemas/RolePermissions'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Non-Admin role rejected
+        '404':
+          description: Unknown role
+        '422':
+          description: Validation failed
 
 components:
   securitySchemes:
@@ -906,6 +1976,87 @@ components:
             code: { type: string, example: 'AUTH_UNAUTHORIZED' }
             status: { type: integer, example: 401 }
             details: { type: object }
+
+    WorkOrder:
+      type: object
+      properties:
+        id: { type: string, example: 'WO-2026-001' }
+        complaintId: { type: string, example: 'CMP-2024-0891' }
+        title: { type: string, example: 'Repair feeder valve 4B — Kasba Bawada' }
+        ward: { type: string, example: 'Kasba Bawada' }
+        assignedTo: { type: string, example: 'Anil Jadhav' }
+        priority: { type: string, enum: [Low, Medium, High, Critical], example: Critical }
+        status: { type: string, enum: [Open, In Progress, On Hold, Completed, Cancelled], example: In Progress }
+        createdAt: { type: string, example: '11 Sep 2026, 08:10' }
+        updatedAt: { type: string, example: '11 Sep 2026, 09:00' }
+        notes: { type: string }
+
+    Ward:
+      type: object
+      properties:
+        id: { type: string, example: 'ward-03' }
+        name: { type: string, example: 'Kasba Bawada' }
+        zone: { type: string, example: 'East' }
+        population: { type: integer, example: 14800 }
+        households: { type: integer, example: 3400 }
+        coveragePct: { type: number, example: 82 }
+        supplyHours: { type: string, example: '17:00–20:00' }
+        status: { type: string, enum: [Normal, Watch, Disrupted], example: Disrupted }
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalWards: { type: integer, example: 8 }
+        activeComplaints: { type: integer, example: 4 }
+        criticalComplaints: { type: integer, example: 1 }
+        cityNrwPct: { type: number, example: 21.5 }
+        activeAlerts: { type: integer, example: 2 }
+        citizensServed: { type: integer, example: 3 }
+        generatedAt: { type: string, example: 'Just now' }
+
+    WaterStatus:
+      type: object
+      properties:
+        overall: { type: string, enum: [Normal, Stable, Attention], example: Attention }
+        onTime: { type: integer }
+        delayed: { type: integer }
+        disrupted: { type: integer }
+        activeOutages: { type: integer }
+        wards:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplyScheduleItem'
+
+    LeakageAnalysis:
+      type: object
+      properties:
+        generatedAt: { type: string, example: 'Just now' }
+        highRiskZones:
+          type: array
+          items: { type: string }
+        zones:
+          type: array
+          items:
+            type: object
+            properties:
+              ward: { type: string }
+              nrw: { type: number }
+              baselineComplaints: { type: integer }
+              liveLeakageComplaints: { type: integer }
+              avgResolutionDays: { type: number }
+              risk: { type: string, enum: [High, Medium, Low] }
+
+    WardComparisonEntry:
+      type: object
+      properties:
+        ward: { type: string, example: 'Kasba Bawada' }
+        nrw: { type: number, example: 38.4 }
+        complaints: { type: integer, example: 68 }
+        resolution: { type: number, example: 4.8 }
+        supply: { type: number, example: 74 }
+        pressure: { type: number, example: 48 }
+        coverage: { type: number, example: 82 }
+        score: { type: integer, example: 52 }
 
     OfficerSessionResponse:
       type: object
