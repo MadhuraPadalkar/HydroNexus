@@ -638,9 +638,29 @@ export const workOrdersApi = {
         status: "Pending",
         priority: payload.priority || "Medium",
         assignedTeam: payload.assignedTeam || "Unassigned",
-        complaintId: payload.complaintId,
-        assignedTo: payload.assignedTo,
-        notes: payload.notes,
+        async createWorkOrder(
+  payload: Partial<WorkOrder>,
+): Promise<ApiResponse<WorkOrder>> {
+  if (isMock()) {
+    await delay()
+    const wo: WorkOrder = {
+      id: `WO-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+      title: payload.title || "Field task",
+      type: payload.type || "Corrective",
+      ward: payload.ward || "",
+      scheduledDate: payload.scheduledDate || "Today",
+      status: "Pending",
+      priority: payload.priority || "Medium",
+      assignedTeam: payload.assignedTeam || "Unassigned",
+      complaintId: payload.complaintId || undefined,
+      assignedTo: payload.assignedTo || undefined,
+      notes: payload.notes || undefined,
+    }
+    mockWorkOrders.unshift(wo)
+    return { success: true, data: wo }
+  }
+  // ... rest of function
+}
       }
       mockWorkOrders.unshift(wo)
       return { success: true, data: wo }
