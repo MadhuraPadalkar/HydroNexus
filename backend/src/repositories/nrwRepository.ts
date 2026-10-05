@@ -35,7 +35,10 @@ export interface NrwRepository {
   listWardStats(): Record<string, WardStats>;
   getWardStat(ward: string): WardStats | undefined;
   /** Updates input/billed volumes for a zone; undefined when unknown. */
-  updateZoneVolumes(zone: string, input: { inputVolumeKL: number; billedVolumeKL: number }): NRWZoneMetric | undefined;
+  updateZoneVolumes(
+    zone: string,
+    input: { inputVolumeKL: number; billedVolumeKL: number },
+  ): NRWZoneMetric | undefined;
 }
 
 export const nrwRepository: NrwRepository = {
