@@ -494,8 +494,32 @@ export function normalizeWorkOrder(r: AnyRecord): WorkOrder {
       ["Low", "Medium", "High", "Critical"] as const,
       "Medium",
     ),
+    export function normalizeWorkOrder(r: AnyRecord): WorkOrder {
+  const rawType = str(r.type, "Corrective")
+  return {
+    id: str(r.id ?? r.code),
+    complaintId: str(r.complaintId ?? r.complaint_id) || undefined,
+    title: str(r.title),
+    type:
+      rawType === "Preventive" || rawType === "Inspection"
+        ? rawType
+        : "Corrective",
+    ward: str(isObject(r.ward) ? r.ward.name : r.ward),
+    scheduledDate: str(r.scheduledDate ?? r.scheduled_date),
+    status: oneOf(
+      r.status,
+      ["Pending", "Assigned", "In Progress", "Completed", "Cancelled"] as const,
+      "Pending",
+    ),
+    priority: oneOf(
+      r.priority,
+      ["Low", "Medium", "High", "Critical"] as const,
+      "Medium",
+    ),
     assignedTeam: str(r.assignedTeam ?? r.assigned_team),
-    assignedTo: str(r.assignedTo ?? r.assigned_to) || undefined,
-    notes: str(r.notes) || undefined,
+    assignedTo: str(r.assignedTo ?? r.assigned_to) || undefined,  // Already correct
+    notes: str(r.notes) || undefined,  // Already correct
+  }
+}
   }
 }
