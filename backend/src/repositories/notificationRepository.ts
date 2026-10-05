@@ -1,20 +1,17 @@
-<<<<<<< HEAD
-// Notification repository — future tables: alerts, notices.
-// Writes here are what Person 2's citizen-side reads (shared collections).
-import type { Alert, Notice } from "@water/types";
-import { alerts, notices } from "../data/store";
+import type { Alert, Notice } from "../../../packages/types/src/index"
+import { db } from "./store"
 
-export type AlertSeverity = Alert["severity"];
-export type AlertType = "Supply" | "Shortage" | "Flood" | "General";
+export type AlertSeverity = Alert["severity"]
+export type AlertType = "Supply" | "Shortage" | "Flood" | "General"
 
 export interface CreateAlertInput {
-  title: string;
-  body: string;
-  severity?: AlertSeverity;
-  type?: AlertType;
-  targetWards?: string[];
-  icon?: string;
-  sentBy?: string;
+  title: string
+  body: string
+  severity?: AlertSeverity
+  type?: AlertType
+  targetWards?: string[]
+  icon?: string
+  sentBy?: string
 }
 
 const TYPE_TO_SEVERITY: Record<AlertType, AlertSeverity> = {
@@ -22,56 +19,24 @@ const TYPE_TO_SEVERITY: Record<AlertType, AlertSeverity> = {
   Shortage: "warning",
   Flood: "critical",
   General: "info",
-};
-
-let seq = 5;
-function nextId(): number {
-  seq += 1;
-  return seq;
 }
-
-export interface NotificationRepository {
-  listAlerts(filters?: { severity?: string }): Alert[];
-  createAlert(input: CreateAlertInput): Alert;
-  listNotices(): Notice[];
-}
-
-export const notificationRepository: NotificationRepository = {
-  listAlerts(filters = {}) {
-    let items = [...alerts];
-    if (filters.severity) items = items.filter((a) => a.severity === filters.severity);
-    return items;
-  },
-
-  createAlert(input) {
-    const alert: Alert = {
-      id: nextId(),
-      severity: input.severity || (input.type ? TYPE_TO_SEVERITY[input.type] : "info"),
-      icon: input.icon || "notifications",
-      title: input.title,
-      body: input.body,
-      time: "Just now",
-      targetWards: input.targetWards || [],
-      sentBy: input.sentBy,
-    };
-    alerts.unshift(alert);
-    return alert;
-  },
-
-  listNotices() {
-    return [...notices];
-  },
-};
-=======
-import type { Alert, Notice } from "../../../packages/types/src/index"
-import { db } from "./store"
 
 /**
- * Read-side repository for citizens. Composing/sending broadcasts is
- * Person 3's officer-side responsibility (POST /alerts); both sides
- * share this same alert/notice store.
+ * Shared alert/notice repository.
+ * Read side (alertsForWard, readIds, notices) used by citizen routes.
+ * Write side (createAlert) used by officer POST /alerts.
  */
 export const notificationRepository = {
+  /** Officer-side: list all alerts, optional ?severity= filter. */
+  listAlerts(filters: { severity?: string } = {}): Alert[] {
+    let items = [...db.alerts]
+    if (filters.severity) {
+      items = items.filter((a) => a.severity === filters.severity)
+    }
+    return items
+  },
+
+  /** Citizen-side: alerts targeted at a specific ward (fuzzy ward match). */
   alertsForWard(ward?: string): Alert[] {
     if (!ward) return [...db.alerts]
     const w = ward.toLowerCase()
@@ -87,24 +52,23 @@ export const notificationRepository = {
       })
     })
   },
-  createAlert(input: {
-    title: string
-    body: string
-    severity: Alert["severity"]
-    targetWards?: string[]
-  }): Alert {
+
+  /** Officer-side: create/broadcast an alert. Accepts severity directly, or a type to map to one. */
+  createAlert(input: CreateAlertInput): Alert {
     const alert: Alert = {
       id: String(Date.now()),
-      severity: input.severity,
-      icon: "notifications",
+      severity: input.severity || (input.type ? TYPE_TO_SEVERITY[input.type] : "info"),
+      icon: input.icon || "notifications",
       title: input.title,
       body: input.body,
       time: "Just now",
-      targetWards: input.targetWards,
+      targetWards: input.targetWards || [],
+      sentBy: input.sentBy,
     }
     db.alerts.unshift(alert)
     return alert
   },
+
   markRead(citizenId: string, alertId: string | number): void {
     const key = String(alertId)
     const existing = db.alertReads[citizenId] || []
@@ -112,14 +76,18 @@ export const notificationRepository = {
       db.alertReads[citizenId] = [...existing, alertId]
     }
   },
+
   readIds(citizenId: string): string[] {
     return (db.alertReads[citizenId] || []).map(String)
   },
+
   notices(): Notice[] {
     return [...db.notices]
   },
+
   wardAverage(ward: string) {
     return db.wardAverages.find((w) => w.ward === ward)
   },
 }
->>>>>>> main
+
+export type NotificationRepository = typeof notificationRepository
