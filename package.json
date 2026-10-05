@@ -10,7 +10,7 @@
     "build:officer": "pnpm --filter officer-portal build",
     "build:citizen": "pnpm --filter citizen-portal build",
     "typecheck": "pnpm -r typecheck",
-    "lint": "eslint apps packages && oxfmt --check",
+    "lint": "eslint apps packages && oxfmt --check apps packages",
     "format": "oxfmt"
   },
   "devDependencies": {
