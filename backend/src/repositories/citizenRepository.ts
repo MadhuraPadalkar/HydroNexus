@@ -15,6 +15,10 @@ export type ConnectionDecision = "approve" | "reject" | "inspection"
 
 export const citizenRepository = {
   // ---------- Citizen-side (self lookups) ----------
+  findById(id: string): CitizenRecord | undefined {
+    return db.citizens.find((c) => c.id === id || c.consumerNumber === id)
+  },
+
   findByPhone(phone: string): CitizenRecord | undefined {
     return db.citizens.find((c) => c.phone === phone)
   },
@@ -58,6 +62,11 @@ export const citizenRepository = {
   // ---------- Officer-side (directory, applications, service requests) ----------
   findCitizen(id: string): CitizenRecord | undefined {
     return db.citizens.find((c) => c.id === id || c.consumerNumber === id)
+  },
+
+  search(query?: unknown): CitizenRecord[] {
+    const search = typeof query === "string" ? query : undefined
+    return citizenRepository.listCitizens({ search })
   },
 
   listCitizens(
