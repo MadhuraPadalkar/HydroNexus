@@ -7,6 +7,7 @@ import {
   Badge,
 } from "@/components/Shared"
 import { useComplaintsData } from "@/hooks/useDataHooks"
+import { complaintsApi } from "@/services/api"
 import { LoadingSpinner, EmptyState, ErrorMessage } from "@water/ui"
 
 const initialComplaints = [
@@ -157,6 +158,27 @@ export default function ComplaintManagement() {
   const [typeFilter, setTypeFilter] = useState("All")
   const [statusFilter, setStatusFilter] = useState("All")
   const [search, setSearch] = useState("")
+  const [resolving, setResolving] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
+
+  // Resolve via the real API when available (mock mode mutates mock store).
+  // UI stays identical; only the data source changes with VITE_USE_MOCKS.
+  const markResolved = async () => {
+    if (!selected || resolving) return
+    setResolving(true)
+    setActionError(null)
+    try {
+      await complaintsApi.updateComplaint(selected.id, { status: "Resolved" })
+      await refetch()
+      setSelected({ ...selected, status: "Resolved" })
+    } catch (err: unknown) {
+      setActionError(
+        err instanceof Error ? err.message : "Failed to resolve complaint",
+      )
+    } finally {
+      setResolving(false)
+    }
+  }
 
   const types = [
     "All",
@@ -451,12 +473,19 @@ export default function ComplaintManagement() {
 
               {/* Action buttons */}
               <div className="space-y-2 pt-2 border-t border-gray-100">
+                {actionError && (
+                  <div className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">
+                    {actionError}
+                  </div>
+                )}
                 {selected.status !== "Resolved" && (
                   <button
-                    className="w-full py-2 rounded-lg text-sm font-medium text-white"
+                    onClick={markResolved}
+                    disabled={resolving}
+                    className="w-full py-2 rounded-lg text-sm font-medium text-white disabled:opacity-60"
                     style={{ backgroundColor: "#0061a5" }}
                   >
-                    Mark as Resolved
+                    {resolving ? "Resolving..." : "Mark as Resolved"}
                   </button>
                 )}
                 <button className="w-full py-2 rounded-lg text-sm font-medium border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">

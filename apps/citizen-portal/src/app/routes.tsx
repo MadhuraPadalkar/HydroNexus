@@ -23,7 +23,6 @@ const AlertsPage = lazy(() => import("@/features/alerts/pages/AlertsPage"))
 const NoticeBoardPage = lazy(
   () => import("@/features/alerts/pages/NoticeBoardPage"),
 )
-const MapPage = lazy(() => import("@/features/map/pages/MapPage"))
 const ProfilePage = lazy(() => import("@/features/profile/pages/ProfilePage"))
 const SupplyStatusPage = lazy(
   () => import("@/features/supply/pages/SupplyStatusPage"),
@@ -134,14 +133,6 @@ export const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <NoticeBoardPage />
-          </SuspenseWrapper>
-        ),
-      },
-      {
-        path: "map",
-        element: (
-          <SuspenseWrapper>
-            <MapPage />
           </SuspenseWrapper>
         ),
       },

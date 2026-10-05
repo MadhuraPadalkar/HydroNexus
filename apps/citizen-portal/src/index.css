@@ -1,10 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 @import 'tailwindcss';
 
 html, body, #root {
   height: 100%;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+}
+
+/* Marathi mode: Devanagari glyphs need extra line height so vowel signs
+   (matras) above/below the line are never clipped. */
+html[lang="mr"] body {
+  font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+/* Android edge-to-edge: keep content clear of the status bar and the
+   gesture navigation bar. env() is 0 where there is no inset. */
+body {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Fixed bottom bars (tab bar, submit bars) must sit above the gesture bar. */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 * {
@@ -85,11 +106,17 @@ html, body, #root {
 }
 
 .btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
   background: #002045;
   color: #ffffff;
-  border-radius: 100px;
-  padding: 14px 32px;
-  font-weight: 600;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 700;
   font-size: 15px;
   letter-spacing: 0.01em;
   border: none;
@@ -97,7 +124,29 @@ html, body, #root {
   transition: background 0.15s, transform 0.1s;
 }
 .btn-primary:hover { background: #002d5e; }
-.btn-primary:active { transform: scale(0.98); }
+.btn-primary:active:not(:disabled) {
+  background: #001a38;
+  transform: scale(0.99);
+}
+.btn-primary:disabled {
+  background: #9aa8bc;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: not-allowed;
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: btnSpin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes btnSpin {
+  to { transform: rotate(360deg); }
+}
 
 .btn-secondary {
   background: transparent;

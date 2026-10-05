@@ -1,4 +1,6 @@
 import React from "react"
+import { useLanguage } from "@/i18n/LanguageContext"
+import { localizeStatus } from "@/i18n/translations"
 
 // Icon Component
 export function Icon({
@@ -28,6 +30,7 @@ export function Icon({
 
 // Status Badge
 export function StatusBadge({ status }: { status: string }) {
+  const { t } = useLanguage()
   const cls =
     status === "Open"
       ? "status-open"
@@ -36,7 +39,7 @@ export function StatusBadge({ status }: { status: string }) {
         : "status-resolved"
   return (
     <span className={`${cls} text-xs font-semibold px-3 py-1 rounded-full`}>
-      {status}
+      {localizeStatus(status, t)}
     </span>
   )
 }

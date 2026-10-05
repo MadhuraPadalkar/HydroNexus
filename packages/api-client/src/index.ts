@@ -1,5 +1,6 @@
 export * from "@water/types"
 export * from "./http"
+export * from "./adapters"
 export * from "./services"
 export * from "./mocks/data"
 
