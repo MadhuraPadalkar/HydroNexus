@@ -412,7 +412,10 @@ export const citizensApi = {
   async updateServiceRequest(
     id: string,
     patch: Partial<
-      Pick<ServiceRequest, "status" | "vehicleNumber" | "driverName" | "notes">
+      Pick<
+        ServiceRequest,
+        "status" | "vehicleNumber" | "driverName" | "notes"
+      >
     >,
   ): Promise<ApiResponse<ServiceRequest>> {
     if (isMock()) {
