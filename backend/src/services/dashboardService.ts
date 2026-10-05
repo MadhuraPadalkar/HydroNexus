@@ -56,7 +56,9 @@ function scoreOf(s: WardStats): number {
   return Math.round(Math.max(0, Math.min(100, 100 - s.nrw - s.complaints / 2 - (s.resolution - 1) * 5)));
 }
 
-export function wardComparison(names: string[]): { unknown: string[]; rows?: WardComparisonResult[] } {
+export function wardComparison(
+  names: string[],
+): { unknown: string[]; rows?: WardComparisonResult[] } {
   const pick = names.length ? names : Object.keys(nrwRepository.listWardStats()).slice(0, 4);
   const stats = nrwRepository.listWardStats();
   const unknown = pick.filter((w) => !stats[w]);
