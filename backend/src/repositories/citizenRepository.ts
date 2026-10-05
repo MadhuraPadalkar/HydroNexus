@@ -60,7 +60,9 @@ export const citizenRepository = {
     return db.citizens.find((c) => c.id === id || c.consumerNumber === id)
   },
 
-  listCitizens(filters: { search?: string; ward?: string; status?: string } = {}): CitizenRecord[] {
+  listCitizens(
+    filters: { search?: string; ward?: string; status?: string } = {},
+  ): CitizenRecord[] {
     let items = [...db.citizens]
     if (filters.search) {
       const q = filters.search.toLowerCase()
@@ -94,7 +96,9 @@ export const citizenRepository = {
     return app
   },
 
-  listServiceRequests(filters: { status?: string; serviceType?: string } = {}): ServiceRequest[] {
+  listServiceRequests(
+    filters: { status?: string; serviceType?: string } = {},
+  ): ServiceRequest[] {
     let items = [...db.serviceRequests]
     if (filters.status) items = items.filter((r) => r.status === filters.status)
     if (filters.serviceType) items = items.filter((r) => r.serviceType === filters.serviceType)
