@@ -27,12 +27,7 @@ export const citizenRepository = {
     return db.citizens.find((c) => c.consumerNumber === consumerNumber)
   },
 
-  create(input: {
-    name: string
-    phone: string
-    ward?: string
-    address?: string
-  }): CitizenRecord {
+  create(input: { name: string; phone: string; ward?: string; address?: string }): CitizenRecord {
     const n = db.citizens.length + 78193
     const record: CitizenRecord = {
       id: `CIT-${n}`,
@@ -91,9 +86,7 @@ export const citizenRepository = {
     return items
   },
 
-  listApplications(
-    filters: { status?: string } = {},
-  ): WaterConnectionApplication[] {
+  listApplications(filters: { status?: string } = {}): WaterConnectionApplication[] {
     let items = [...db.connectionApplications]
     if (filters.status) items = items.filter((a) => a.status === filters.status)
     return items
@@ -107,11 +100,7 @@ export const citizenRepository = {
     const app = db.connectionApplications.find((a) => a.id === id)
     if (!app) return undefined
     app.status =
-      action === "approve"
-        ? "Approved"
-        : action === "reject"
-          ? "Rejected"
-          : "Site Inspection"
+      action === "approve" ? "Approved" : action === "reject" ? "Rejected" : "Site Inspection"
     app.approvedBy = actor
     return app
   },
@@ -121,14 +110,14 @@ export const citizenRepository = {
   ): ServiceRequest[] {
     let items = [...db.serviceRequests]
     if (filters.status) items = items.filter((r) => r.status === filters.status)
-    if (filters.serviceType)
-      items = items.filter((r) => r.serviceType === filters.serviceType)
+    if (filters.serviceType) items = items.filter((r) => r.serviceType === filters.serviceType)
     return items
   },
 
   updateServiceRequest(
     id: string,
-    patch: Pick<ServiceRequest, "status"> & Partial<Pick<ServiceRequest, "vehicleNumber" | "driverName" | "notes">>,
+    patch: Pick<ServiceRequest, "status"> &
+      Partial<Pick<ServiceRequest, "vehicleNumber" | "driverName" | "notes">>,
   ): ServiceRequest | undefined {
     const item = db.serviceRequests.find((r) => r.id === id)
     if (!item) return undefined
