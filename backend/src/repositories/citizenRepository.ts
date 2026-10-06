@@ -75,7 +75,7 @@ export const citizenRepository = {
   },
 
   listCitizens(
-    filters: { search?: string ward?: string status?: string } = {},
+    filters: { search?: string; ward?: string; status?: string } = {},
   ): CitizenRecord[] {
     let items = [...db.citizens]
     if (filters.search) {
@@ -117,7 +117,7 @@ export const citizenRepository = {
   },
 
   listServiceRequests(
-    filters: { status?: string serviceType?: string } = {},
+    filters: { status?: string; serviceType?: string } = {},
   ): ServiceRequest[] {
     let items = [...db.serviceRequests]
     if (filters.status) items = items.filter((r) => r.status === filters.status)

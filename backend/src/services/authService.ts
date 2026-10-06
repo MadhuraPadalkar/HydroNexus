@@ -105,7 +105,7 @@ export const authService = {
     return issueSession(citizen.id)
   },
 
-  refresh(refreshToken: string): { token: string refreshToken: string } {
+  refresh(refreshToken: string): { token: string; refreshToken: string } { {
     let sub = ""
     try {
       const payload = jwt.verify(refreshToken, env.jwtSecret) as {
@@ -149,5 +149,5 @@ export const authService = {
       expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
     })
     return { token: access, refreshToken: next }
-  },
-}
+  }
+},}

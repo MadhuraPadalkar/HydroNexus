@@ -9,9 +9,9 @@ export type MaintenanceCreateInput = Omit<MaintenanceTask, "id">
 export type MaintenanceUpdateInput = Partial<MaintenanceTask>
 
 export interface SupplyRepository {
-  listSchedules(filters?: { ward?: string zone?: string }): SupplyScheduleItem[]
+  listSchedules(filters?: { ward?: string; zone?: string }): SupplyScheduleItem[]
   upsertSchedule(row: SupplyScheduleItem): SupplyScheduleItem
-  listOutages(filters?: { status?: string ward?: string }): Outage[]
+  listOutages(filters?: { status?: string; ward?: string }): Outage[]
   findOutage(id: string): Outage | undefined
   createOutage(input: OutageCreateInput): Outage
   updateOutage(id: string, patch: OutageUpdateInput): Outage | undefined

@@ -72,7 +72,7 @@ function scoreOf(s: WardStats): number {
 
 export function wardComparison(
   names: string[],
-): { unknown: string[] rows?: WardComparisonResult[] } {
+): { unknown: string[]; rows?: WardComparisonResult[] } {
   const pick = names.length
     ? names
     : Object.keys(nrwRepository.listWardStats()).slice(0, 4)

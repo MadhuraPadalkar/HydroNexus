@@ -28,7 +28,7 @@ async function req(
   path: string,
   body?: unknown,
   token?: string,
-): Promise<{ status: number json: Json }> {
+): Promise<{ status: number; json: Json }> {
   const headers: Record<string, string> = { "Content-Type": "application/json" }
   if (token) headers.Authorization = `Bearer ${token}`
   const res = await fetch(base + path, {

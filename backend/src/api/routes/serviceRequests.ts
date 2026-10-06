@@ -27,7 +27,7 @@ function withCitizenStatus(
 
 function identityOf(
   auth: AuthedRequest["auth"],
-): { name: string phone: string } {
+):  { name: string; phone: string }  {
   const citizen = auth ? citizenRepository.findById(auth.sub) : undefined
   return { name: citizen?.name || "Citizen", phone: citizen?.phone || "" }
 }

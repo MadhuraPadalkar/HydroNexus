@@ -29,7 +29,7 @@ function actor(req: Request): string {
 function invalidDate(
   field: string,
   value: string,
-): { field: string reason: string } {
+): { field: string; reason: string } {
   return { field, reason: `${field} is not a parseable date: ${value}` }
 }
 
@@ -107,7 +107,7 @@ const outageSchema: z.ZodType<OutageRequestBody> = z.object({
 function outageDateError(
   start: string,
   end: string,
-): { field: string reason: string } | null {
+): { field: string; reason: string } | null {
   const s = parseWaterDate(start)
   if (s === null) return invalidDate("startTime", start)
   const e = parseWaterDate(end)

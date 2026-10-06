@@ -51,7 +51,7 @@ export function leakageAnalysis(): LeakageAnalysis {
 /** Returns entries for known wards, or the unknown names when any are missing. */
 export function compareWards(
   names: string[],
-): { unknown: string[] comparison?: WardComparisonEntry[] } {
+): { unknown: string[]; comparison?: WardComparisonEntry[] } {
   const unknown = names.filter((w) => !nrwRepository.getWardStat(w))
   if (unknown.length) return { unknown }
   return {

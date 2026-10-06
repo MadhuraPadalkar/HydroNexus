@@ -14,7 +14,7 @@ export function assignComplaint(
   complaintId: string,
   engineer: string,
   actor: string,
-  opts?: { workOrderId?: string notes?: string },
+  opts?: { workOrderId?: string; notes?: string },
 ): AssignResult | undefined {
   const complaint = complaintRepository.assign(
     complaintId,
