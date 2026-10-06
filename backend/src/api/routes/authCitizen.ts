@@ -30,7 +30,7 @@ authCitizenRouter.post(
       const session = authService.verifyOtp(phone, otp, name, ward)
       res.json({ success: true, data: session })
     } catch (err: unknown) {
-      const e = err as Error & { status?: number code?: string }
+      const e = err as Error & { status?: number; code?: string }
       res.status(e.status || 401).json({
         success: false,
         error: {
@@ -51,7 +51,7 @@ authCitizenRouter.post(
     try {
       res.json({ success: true, data: authService.refresh(refreshToken) })
     } catch (err: unknown) {
-      const e = err as Error & { status?: number code?: string }
+      const e = err as Error & { status?: number; code?: string }
       res.status(e.status || 401).json({
         success: false,
         error: {

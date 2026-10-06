@@ -105,7 +105,7 @@ export const authService = {
     return issueSession(citizen.id)
   },
 
-  refresh(refreshToken: string): { token: string refreshToken: string } {
+  refresh(refreshToken: string): { token: string; refreshToken: string } {
     let sub = ""
     try {
       const payload = jwt.verify(refreshToken, env.jwtSecret) as {
