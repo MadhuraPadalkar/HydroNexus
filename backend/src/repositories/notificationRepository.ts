@@ -57,8 +57,7 @@ export const notificationRepository = {
   createAlert(input: CreateAlertInput): Alert {
     const alert: Alert = {
       id: String(Date.now()),
-      severity:
-        input.severity || (input.type ? TYPE_TO_SEVERITY[input.type] : "info"),
+      severity: input.severity || (input.type ? TYPE_TO_SEVERITY[input.type] : "info"),
       icon: input.icon || "notifications",
       title: input.title,
       body: input.body,

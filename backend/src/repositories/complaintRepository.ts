@@ -159,11 +159,7 @@ export const complaintRepository = {
     return TERMINAL.includes(status as ComplaintStatus)
   },
 
-  update(
-    id: string,
-    patch: UpdateComplaintInput,
-    actor?: string,
-  ): Complaint | undefined {
+  update(id: string, patch: UpdateComplaintInput, actor?: string): Complaint | undefined {
     const complaint = db.complaints.find((c) => c.id === id)
     if (!complaint) return undefined
 
@@ -177,9 +173,7 @@ export const complaintRepository = {
         {
           status: patch.status,
           time: stamp,
-          note:
-            patch.note ||
-            `Status changed to ${patch.status} by ${actor || "officer"}`,
+          note: patch.note || `Status changed to ${patch.status} by ${actor || "officer"}`,
         },
       ]
     }
@@ -190,19 +184,11 @@ export const complaintRepository = {
 
   /** Assignment workflow: sets engineer, advances Open/Pending to In
    * Progress, appends an "Assigned" timeline entry. */
-  assign(
-    id: string,
-    engineer: string,
-    actor?: string,
-    notes?: string,
-  ): Complaint | undefined {
+  assign(id: string, engineer: string, actor?: string, notes?: string): Complaint | undefined {
     const complaint = db.complaints.find((c) => c.id === id)
     if (!complaint) return undefined
     complaint.assigned = engineer
-    if (
-      complaint.status === "Open" ||
-      complaint.status as string === "Pending"
-    ) {
+    if (complaint.status === "Open" || (complaint.status as string) === "Pending") {
       ;(complaint as { status: string }).status = "In Progress"
     }
     const stamp = timestamp()
