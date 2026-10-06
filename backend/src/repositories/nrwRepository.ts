@@ -29,16 +29,16 @@ function withDerived(z: NRWZoneMetric): NRWZoneMetric {
 }
 
 export interface NrwRepository {
-  listMetrics(): NRWZoneMetric[];
-  citySummary(): CityNrwSummary;
-  listLeakages(filters?: { status?: string; ward?: string }): LeakageIncident[];
-  listWardStats(): Record<string, WardStats>;
-  getWardStat(ward: string): WardStats | undefined;
+  listMetrics(): NRWZoneMetric[]
+  citySummary(): CityNrwSummary
+  listLeakages(filters?: { status?: string; ward?: string }): LeakageIncident[]
+  listWardStats(): Record<string, WardStats>
+  getWardStat(ward: string): WardStats | undefined
   /** Updates input/billed volumes for a zone; undefined when unknown. */
   updateZoneVolumes(
     zone: string,
     input: { inputVolumeKL: number; billedVolumeKL: number },
-  ): NRWZoneMetric | undefined;
+  ): NRWZoneMetric | undefined
 }
 
 export const nrwRepository: NrwRepository = {

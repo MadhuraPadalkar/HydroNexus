@@ -59,10 +59,12 @@ function scoreOf(s: WardStats): number {
 export function wardComparison(
   names: string[],
 ): { unknown: string[]; rows?: WardComparisonResult[] } {
-  const pick = names.length ? names : Object.keys(nrwRepository.listWardStats()).slice(0, 4);
-  const stats = nrwRepository.listWardStats();
-  const unknown = pick.filter((w) => !stats[w]);
-  if (unknown.length) return { unknown };
+  const pick = names.length
+    ? names
+    : Object.keys(nrwRepository.listWardStats()).slice(0, 4)
+  const stats = nrwRepository.listWardStats()
+  const unknown = pick.filter((w) => !stats[w])
+  if (unknown.length) return { unknown }
   return {
     unknown: [],
     rows: pick.map((ward) => ({ ward, ...stats[ward], score: scoreOf(stats[ward]) })),

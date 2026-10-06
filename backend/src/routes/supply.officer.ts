@@ -26,8 +26,11 @@ function actor(req: Request): string {
   return (req as AuthedRequest).user.sub;
 }
 
-function invalidDate(field: string, value: string): { field: string; reason: string } {
-  return { field, reason: `${field} is not a parseable date: ${value}` };
+function invalidDate(
+  field: string,
+  value: string,
+): { field: string; reason: string } {
+  return { field, reason: `${field} is not a parseable date: ${value}` }
 }
 
 // ---- Schedule ----
@@ -85,15 +88,22 @@ const outageSchema: z.ZodType<OutageRequestBody> = z.object({
   affectedPopulation: z.number().int().nonnegative().optional(),
   tankersDispatched: z.number().int().nonnegative().optional(),
   autoNotify: z.boolean().optional(),
-});
+})
 
-function outageDateError(start: string, end: string): { field: string; reason: string } | null {
-  const s = parseWaterDate(start);
-  if (s === null) return invalidDate("startTime", start);
-  const e = parseWaterDate(end);
-  if (e === null) return invalidDate("estimatedRestoration", end);
-  if (e < s) return { field: "estimatedRestoration", reason: "estimatedRestoration is before startTime" };
-  return null;
+function outageDateError(
+  start: string,
+  end: string,
+): { field: string; reason: string } | null {
+  const s = parseWaterDate(start)
+  if (s === null) return invalidDate("startTime", start)
+  const e = parseWaterDate(end)
+  if (e === null) return invalidDate("estimatedRestoration", end)
+  if (e < s)
+    return {
+      field: "estimatedRestoration",
+      reason: "estimatedRestoration is before startTime",
+    }
+  return null
 }
 
 router.post("/outages", requireRoles(...WRITE_ROLES), (req: Request, res: Response) => {

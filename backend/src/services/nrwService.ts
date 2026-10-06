@@ -46,8 +46,8 @@ export function leakageAnalysis(): LeakageAnalysis {
 export function compareWards(
   names: string[],
 ): { unknown: string[]; comparison?: WardComparisonEntry[] } {
-  const unknown = names.filter((w) => !nrwRepository.getWardStat(w));
-  if (unknown.length) return { unknown };
+  const unknown = names.filter((w) => !nrwRepository.getWardStat(w))
+  if (unknown.length) return { unknown }
   return {
     unknown: [],
     comparison: names.map((ward) => ({

@@ -11,16 +11,22 @@ export type MaintenanceCreateInput = Omit<MaintenanceTask, "id">;
 export type MaintenanceUpdateInput = Partial<MaintenanceTask>;
 
 export interface SupplyRepository {
-  listSchedules(filters?: { ward?: string; zone?: string }): SupplyScheduleItem[];
-  upsertSchedule(row: SupplyScheduleItem): SupplyScheduleItem;
-  listOutages(filters?: { status?: string; ward?: string }): Outage[];
-  findOutage(id: string): Outage | undefined;
-  createOutage(input: OutageCreateInput): Outage;
-  updateOutage(id: string, patch: OutageUpdateInput): Outage | undefined;
-  listMaintenance(filters?: { status?: string; ward?: string }): MaintenanceTask[];
-  findMaintenanceTask(id: string): MaintenanceTask | undefined;
-  createMaintenanceTask(input: MaintenanceCreateInput): MaintenanceTask;
-  updateMaintenanceTask(id: string, patch: MaintenanceUpdateInput): MaintenanceTask | undefined;
+  listSchedules(filters?: { ward?: string; zone?: string }): SupplyScheduleItem[]
+  upsertSchedule(row: SupplyScheduleItem): SupplyScheduleItem
+  listOutages(filters?: { status?: string; ward?: string }): Outage[]
+  findOutage(id: string): Outage | undefined
+  createOutage(input: OutageCreateInput): Outage
+  updateOutage(id: string, patch: OutageUpdateInput): Outage | undefined
+  listMaintenance(filters?: {
+    status?: string
+    ward?: string
+  }): MaintenanceTask[]
+  findMaintenanceTask(id: string): MaintenanceTask | undefined
+  createMaintenanceTask(input: MaintenanceCreateInput): MaintenanceTask
+  updateMaintenanceTask(
+    id: string,
+    patch: MaintenanceUpdateInput,
+  ): MaintenanceTask | undefined
 }
 
 export const supplyRepository: SupplyRepository = {
